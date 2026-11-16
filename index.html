@@ -143,6 +143,12 @@ h1 em{font-style:italic}
 .st-durum{font-size:13px;color:var(--muted)}
 .st-analiz{border:0;border-radius:10px;padding:9px 16px;font:600 14px var(--sans);color:#fff;background:#2f8a52;cursor:pointer}
 .st-analiz:disabled{opacity:.5;cursor:default}
+.st-olcer{display:inline-flex;gap:2px;align-items:center;height:14px}
+.st-olcer i{width:4px;height:100%;border-radius:1px;background:var(--line2);transition:background .06s}
+.st-olcer i.y{background:#3fae6a}.st-olcer i.s{background:#e09a2a}.st-olcer i.k{background:#e0566a}
+.st-max{border:1px solid var(--line2);border-radius:10px;padding:8px 12px;font:600 12.5px var(--sans);color:var(--muted);background:transparent;cursor:pointer}
+.st-max[aria-pressed="true"]{color:#fff;background:var(--grad);border-color:transparent}
+@media (max-width:640px){.st-max{display:none}}
 .st-hiz{border:1px solid var(--line2);border-radius:10px;padding:8px 12px;font:600 13px ui-monospace,Menlo,monospace;color:var(--text);background:transparent;cursor:pointer;min-width:52px}
 .st-bastan{border:1px solid var(--line2);border-radius:10px;padding:8px 14px;font:500 13px var(--sans);color:var(--text);background:transparent;cursor:pointer}
 .st-kanallar{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg2)}
@@ -396,8 +402,10 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <div class="st-tr">
       <button class="st-btn st-oynat" type="button" aria-label="Oynat"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a.9.9 0 0 0 1.4.8l10-6.4a.9.9 0 0 0 0-1.6l-10-6.4A.9.9 0 0 0 8 5.6z"/></svg></button>
       <span class="st-saat">0:00</span>
+      <span class="st-olcer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <span class="st-durum">RAW kaydı dinleyin, sonra analiz edin</span>
       <span class="sp"></span>
+      <button class="st-max" type="button" aria-pressed="false" title="Maximizer: yalnız dinlerken sesi toparlayıp yükseltir; kurguya ve dışa aktarmaya etki etmez">Maximizer</button>
       <button class="st-hiz" type="button" title="Dinleme hızı (ses perdesi korunur)">1×</button>
       <button class="st-analiz" type="button">Analiz et</button>
       <button class="st-bastan" type="button" hidden>Baştan</button>
@@ -711,7 +719,20 @@ function studioKur(){
   // --- çalma: iki <audio> (RAW: m4a; kurgu: tarayıcıda çizilen WAV); hız değişince ses perdesi korunur ---
   var aRaw = new Audio(), aKur = new Audio(), HIZ = [1, 1.25, 1.5, 2], hz = 0, kurguUrl = null, kurguHazir = null;
   [aRaw, aKur].forEach(function(a){ a.preload = "auto"; a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true; });
-  var hizB = $(".st-hiz", demo);
+  var hizB = $(".st-hiz", demo), maxB = $(".st-max", demo), OL = demo.querySelectorAll(".st-olcer i"), zincir = null, maxAcik = false;
+  function zincirKur(){   // ilk çalışta (kullanıcı dokunuşuyla) kurulur
+    if (zincir) return; ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    var cmp = ctx.createDynamicsCompressor(), kaz = ctx.createGain(), an = ctx.createAnalyser(), giris = ctx.createGain();
+    cmp.threshold.value = -24; cmp.knee.value = 6; cmp.ratio.value = 6; cmp.attack.value = .003; cmp.release.value = .12;
+    an.fftSize = 512; giris.connect(an); an.connect(ctx.destination);
+    [aRaw, aKur].forEach(function(a){ try { ctx.createMediaElementSource(a).connect(giris); } catch(e){} });
+    zincir = { cmp: cmp, kaz: kaz, an: an, giris: giris, veri: new Float32Array(an.fftSize) }; maxUygula(); }
+  function maxUygula(){ if (!zincir) return; var z = zincir; z.giris.disconnect();
+    if (maxAcik){ z.giris.connect(z.cmp); z.cmp.connect(z.kaz); z.kaz.gain.value = 2.2; z.kaz.connect(z.an); } else { z.giris.connect(z.an); } }
+  maxB.onclick = function(){ maxAcik = !maxAcik; maxB.setAttribute("aria-pressed", maxAcik ? "true" : "false"); maxUygula(); };
+  function olcer(){ if (!zincir) return; var z = zincir; z.an.getFloatTimeDomainData(z.veri); var p = 0; for (var i = 0; i < z.veri.length; i++) p = Math.max(p, Math.abs(z.veri[i]));
+    var db = 20 * Math.log10(p + 1e-6), n = Math.max(0, Math.min(10, Math.round((db + 42) / 4.2)));
+    OL.forEach(function(e, i){ e.className = i < n ? (i >= 9 ? "k" : i >= 7 ? "s" : "y") : ""; }); }
   hizB.onclick = function(){ hz = (hz + 1) % HIZ.length; hizB.textContent = String(HIZ[hz]).replace(".", ",") + "×"; [aRaw, aKur].forEach(function(a){ a.playbackRate = HIZ[hz]; }); };
   function wavYap(b){ var n = b.length, sr = b.sampleRate, d = b.getChannelData(0), ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
     function yz(o, s){ for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
@@ -727,14 +748,14 @@ function studioKur(){
     kurguHazir = new Promise(function(res){ var p = oc.startRendering(); if (p && p.then) p.then(res); else oc.oncomplete = function(e){ res(e.renderedBuffer); }; })
       .then(function(b){ if (kurguUrl) URL.revokeObjectURL(kurguUrl); kurguUrl = URL.createObjectURL(wavYap(b)); aKur.src = kurguUrl; aKur.playbackRate = HIZ[hz]; });
     return kurguHazir; }
-  function durdur(){ if (!cal) return; cal.el.pause(); cancelAnimationFrame(cal.raf); cal = null; oynatSimge(false);
+  function durdur(){ OL.forEach(function(e){ e.className = ""; }); if (!cal) return; cal.el.pause(); cancelAnimationFrame(cal.raf); cal = null; oynatSimge(false);
     $(".st-ib", RAW).classList.remove("on"); $(".st-ib", KUR).classList.remove("on"); KW.forEach(function(k){ k.classList.remove("on"); }); }
   function oynat(bas0){
-    if (!D) return; durdur();
+    if (!D) return; durdur(); zincirKur(); if (ctx.state === "suspended") ctx.resume();
     var el = analizli ? aKur : aRaw, kip = analizli ? "kurgu" : "raw";
     var basla = function(){ try { el.currentTime = bas0 || 0; } catch(e){} el.playbackRate = HIZ[hz]; var pr = el.play(); if (pr && pr.catch) pr.catch(function(){});
       cal = { kip: kip, el: el }; oynatSimge(true);
-      (function adim(){ if (!cal || cal.el !== el) return; if (el.ended){ durdur(); return; } goster(el.currentTime); cal.raf = requestAnimationFrame(adim); })(); };
+      (function adim(){ if (!cal || cal.el !== el) return; if (el.ended){ durdur(); return; } goster(el.currentTime); olcer(); cal.raf = requestAnimationFrame(adim); })(); };
     if (analizli && kurguHazir) kurguHazir.then(basla); else basla();
   }
   function goster(t){
@@ -900,4 +921,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 22:47 -->
+<!-- yayin: 2026-11-16 22:49 -->
