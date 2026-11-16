@@ -16,4 +16,6 @@ if [ -d dene ]; then
   for f in index.php ortak.php sil.php cloudflare.php .htaccess; do cp "dene/$f" "$HEDEF/dene/$f"; done
 fi
 [ -f aydinlatma.html ] && cp aydinlatma.html "$HEDEF/aydinlatma.html"
+# ana sayfadaki deneme alanının örnekleri (ses + analiz sonucu)
+if [ -d ornek ]; then mkdir -p "$HEDEF/ornek"; cp ornek/*.json ornek/*.m4a "$HEDEF/ornek/"; fi
 echo "$H" > "$HOME/.odyobuk_son"

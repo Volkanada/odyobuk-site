@@ -124,6 +124,37 @@ h1 em{font-style:italic}
 .dtx{font-family:var(--serif);font-size:19px;line-height:1.6;color:var(--muted);margin:0 0 40px}
 .dtx .hl{color:var(--text);background:var(--tint);border-radius:4px;padding:1px 3px}
 .stage{position:relative;height:126px}
+/* deneme alanı (hero) */
+.st{padding:18px 20px 16px}
+.st-ust{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.st-sec{display:inline-flex;gap:4px;padding:3px;background:var(--bg2);border:1px solid var(--line);border-radius:999px}
+.st-sec button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font:600 13px var(--sans);color:var(--muted);cursor:pointer}
+.st-sec button[aria-selected="true"]{background:var(--grad);color:#fff}
+.st-not{font-size:12px;color:var(--soft)}
+.st-metin{font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--muted);height:118px;overflow:hidden;position:relative;margin-bottom:10px;
+  -webkit-mask:linear-gradient(#000 70%,transparent);mask:linear-gradient(#000 70%,transparent)}
+.st-metin .kw{border-radius:4px;transition:background .12s,color .12s}
+.st-metin .kw.on{background:var(--grad);color:#fff;padding:0 2px;margin:0 -2px}
+.st-metin .kw.ok{color:var(--text)}
+.st-tr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.st-btn{width:38px;height:38px;border-radius:50%;border:0;background:var(--text);color:var(--bg);display:grid;place-items:center;cursor:pointer;flex:none}
+.st-btn svg{width:18px;height:18px;fill:currentColor}
+.st-saat{font:600 15px ui-monospace,Menlo,monospace;color:var(--text);min-width:44px}
+.st-durum{font-size:13px;color:var(--muted)}
+.st-analiz{border:0;border-radius:10px;padding:9px 16px;font:600 14px var(--sans);color:#fff;background:#2f8a52;cursor:pointer}
+.st-analiz:disabled{opacity:.5;cursor:default}
+.st-bastan{border:1px solid var(--line2);border-radius:10px;padding:8px 14px;font:500 13px var(--sans);color:var(--text);background:transparent;cursor:pointer}
+.st-kanallar{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg2)}
+.st-kn{display:flex;height:78px}.st-kn+.st-kn{border-top:1px solid var(--line)}
+.st-ad{width:96px;flex:none;padding:10px 10px;border-right:1px solid var(--line);font-size:12px;color:var(--soft);line-height:1.3}
+.st-ad b{display:block;color:var(--text);font-size:13px}
+.st-alan{flex:1;position:relative;cursor:pointer;min-width:0}
+.st-alan canvas{position:absolute;inset:0;width:100%;height:100%}
+.st-ib{position:absolute;top:0;bottom:0;width:2px;background:var(--c2);left:50%;pointer-events:none;opacity:0;transition:opacity .2s}
+.st-ib.on{opacity:1}
+.st-bos{position:absolute;inset:0;display:grid;place-items:center;font-size:12.5px;color:var(--soft)}
+.st-ipucu{font-size:12.5px;color:var(--soft);margin-top:10px;line-height:1.5}
+@media (max-width:640px){.st-metin{font-size:16px;height:104px}.st-ad{width:70px;font-size:11px}.st-not,.st-durum{display:none}}
 .clip.hata{background:color-mix(in srgb,var(--rose) 20%,transparent);color:var(--rose);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--rose) 70%,transparent)}
 .demo .clip.hata .lbl{opacity:1}
 .clip.kaynak{opacity:.55}
@@ -355,16 +386,27 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   <div class="cta"><a class="btn p lg" href="https://studio.odyobuk.com">Studio'ya giriş</a><a class="btn lg" href="#nasil">Nasıl çalışır</a></div>
   <p class="note">Kurulum yok · Mac ve Windows tarayıcısından · kullanıcı adı ve şifreyle</p>
 
-  <div class="card demo" id="demo" aria-label="Örnek: ham kayıt metne göre kurguya dönüşür">
-    <p class="dtx">Ali sessizce masaya geçti, çayından azıcık içti. <span class="hl">Pencereden bahçedeki yaşlı ceviz ağacı görünüyordu.</span></p>
-    <div class="stage">
-      <div class="phase"><i></i><span id="phase">RAW kayıt</span></div>
-      <div class="row" style="top:0"><div class="lb"><b id="hk1">RAW Kayıt</b><span id="hk1a">kaydınız</span></div><div class="tr"></div></div>
-      <div class="row" style="top:76px"><div class="lb"><b>Kurgu</b>editlenmiş</div><div class="tr"></div></div>
-      <div class="lane" id="lane"></div>
-      <div class="lane" style="pointer-events:none"><div id="hph"></div><div id="rph"></div><div id="kph"></div></div>
+  <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
+    <div class="st-ust">
+      <div class="st-sec" role="tablist" aria-label="Örnek metin"></div>
+      <span class="st-not">Gerçek kayıt · gerçek analiz sonucu</span>
     </div>
+    <div class="st-metin" aria-live="off"></div>
+    <div class="st-tr">
+      <button class="st-btn st-oynat" type="button" aria-label="Oynat"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a.9.9 0 0 0 1.4.8l10-6.4a.9.9 0 0 0 0-1.6l-10-6.4A.9.9 0 0 0 8 5.6z"/></svg></button>
+      <span class="st-saat">0:00</span>
+      <span class="st-durum">RAW kaydı dinleyin, sonra analiz edin</span>
+      <span class="sp"></span>
+      <button class="st-analiz" type="button">Analiz et</button>
+      <button class="st-bastan" type="button" hidden>Baştan</button>
+    </div>
+    <div class="st-kanallar">
+      <div class="st-kn"><div class="st-ad"><b>RAW Kayıt</b><small>kaydınız</small></div><div class="st-alan" data-k="raw"><canvas></canvas><div class="st-ib"></div></div></div>
+      <div class="st-kn"><div class="st-ad"><b>Kurgu</b><small>editlenmiş</small></div><div class="st-alan" data-k="kurgu"><canvas></canvas><div class="st-ib"></div><div class="st-bos">Analiz edince burada görünecek</div></div></div>
+    </div>
+    <div class="st-ipucu">Kırmızılar kurguya girmeyen yerler: tekrar, nefes, metinde olmayan ses. Birine <b>çift tıklayın</b>, kurguya girsin. Kanala tıklayınca oradan çalar.</div>
   </div>
+</div>
 </div>
 
 <section id="nasil"><div class="w">
@@ -590,71 +632,142 @@ ANIM.indir = async function(vz, w){
   $(".bitti", vz).classList.add("on"); await w(2400);
 };
 
-/* ---------- HERO: RAW kayıt → kurgu; hatalar RAW'da kırmızı kalır; senkron dinleme (metinde kelime takibi) ---------- */
-var demo = $("#demo"), lane = $("#lane"), phase = $("#phase"), HK = [], KG = [];
-(function(){
-  var kx = 0;
-  [[19,0,"k"],[3,20,"n","nefes"],[15,24,"b","yanlış okuma"],[22,40,"k"],[3,63,"n","nefes"],[6,67,"b","öksürük"],[24,74,"k"]].forEach(function(c){
-    var e = h("div", "clip " + (c[2] === "k" ? "g" : c[2]), c[3] ? '<span class="lbl">' + c[3] + "</span>" : "");
-    e.style.width = c[0] + "%"; c.kx = c[2] === "k" ? kx : null; if (c[2] === "k") kx += c[0] + 1; lane.appendChild(e); HK.push([e, c]); });
-  // metni kelimelere böl (dinlerken kelime takibi için)
-  var dtx = $(".dtx", demo);
-  dtx.querySelectorAll("*").length; // .hl içi dahil
-  (function bol(node){ Array.prototype.slice.call(node.childNodes).forEach(function(n){
-    if (n.nodeType === 3){ var f = document.createDocumentFragment();
-      n.textContent.split(/(\s+)/).forEach(function(t){ if (!t) return; if (/^\s+$/.test(t)) f.appendChild(document.createTextNode(t)); else { var sp = h("span", "kw"); sp.textContent = t; f.appendChild(sp); } });
-      node.replaceChild(f, n); }
-    else bol(n); }); })(dtx);
-  izle(demo);
-})();
-function heroBaslat(){
-  var hph = $("#hph"), rph = $("#rph"), kph = $("#kph"), KW = demo.querySelectorAll(".dtx .kw");
-  var IYI = HK.filter(function(p){ return p[1][2] === "k"; });
-  var kurguSon = IYI.reduce(function(a, p){ return Math.max(a, p[1].kx + p[1][0]); }, 0);
-  function temizle(){
-    KG.forEach(function(e){ e.remove(); }); KG = [];
-    HK.forEach(function(p){ var e = p[0], c = p[1]; e.style.left = c[1] + "%"; e.style.top = "7px"; e.className = "clip " + (c[2] === "k" ? "g" : c[2]); e.style.opacity = 1; });
-    KW.forEach(function(k){ k.classList.remove("on"); });
-    [hph, rph, kph].forEach(function(x){ x.style.opacity = 0; x.style.left = "0%"; });
-  }
-  oynat(demo, async function(el, w){
-    demo.classList.add("sifir"); lane.style.opacity = 0; temizle(); demo.classList.remove("done", "kay");
-    void lane.offsetWidth; demo.classList.remove("sifir"); phase.textContent = "RAW kayıt";
-    lane.style.opacity = 1; await w(1100);
-    // 1) metinle eşleştirme: tarama; hatalar RAW'da kırmızı kalır
-    phase.textContent = "Metinle eşleştiriliyor…"; hph.style.opacity = 1;
-    for (var x = 0; x <= 100; x += 2){ hph.style.left = x + "%";
-      HK.forEach(function(p){ var c = p[1]; if (!p[0].classList.contains("tara") && x >= c[1] + c[0] / 2){ p[0].classList.add("tara"); if (c[2] !== "k") p[0].classList.add("hata"); } });
-      await w(26); }
-    hph.style.opacity = 0; await w(300);
-    // 2) doğru okumalar kurguya iner (RAW'da kaynak olarak kalır), boşluklar kapanır
-    phase.textContent = "Kurgu kuruluyor"; demo.classList.add("done");
-    IYI.forEach(function(p){ var e = p[0], c = p[1];
-      var k = h("div", "clip g"); k.style.width = c[0] + "%"; k.style.left = c[1] + "%"; k.style.top = "7px"; lane.appendChild(k); KG.push(k); k.kaynak = c; e.classList.add("kaynak"); });
-    void lane.offsetWidth;
-    KG.forEach(function(k){ k.style.top = "83px"; k.classList.add("k"); });
-    await w(950);
-    KG.forEach(function(k){ k.style.left = k.kaynak.kx + "%"; });
-    await w(1000);
-    // 3) senkron dinleme: kurguda çalma kafası, RAW'da kaynak yeri, metinde okunan kelime
-    phase.textContent = "Dinleniyor · metinde kelime takibi"; kph.style.opacity = 1; rph.style.opacity = 1;
-    var n = KW.length, son = -1, aktif = null; demo.classList.add("kay");
-    for (var t = 0; t <= kurguSon; t += 0.6){
-      kph.style.left = t + "%";
-      var p = IYI.find(function(q){ return t >= q[1].kx && t <= q[1].kx + q[1][0]; });
-      if (p && p !== aktif){ aktif = p; var kay = p[1].kx - p[1][1];       // RAW, kurgudaki yere göre kayar: kaynak tam imlecin altında
-        HK.forEach(function(q){ q[0].style.left = (q[1][1] + kay) + "%"; }); }
-      rph.style.left = t + "%";
-      var ki = Math.min(n - 1, Math.floor(t / kurguSon * n));
-      if (ki !== son){ if (son >= 0) KW[son].classList.remove("on"); KW[ki].classList.add("on"); son = ki; }
-      await w(55);
+/* ---------- HERO: deneme alanı — gerçek kayıt, gerçek analiz sonucu (ornek/*.json + *.m4a; sunucuya bağlanmaz) ---------- */
+var demo = $("#demo"), ST = null;
+function heroBaslat(){ if (ST) return; ST = studioKur(); }
+function studioKur(){
+  var ORN = [["doga", "Doğa ve göl"], ["can", "Can ve sis"], ["kumsal", "Gizli kumsal"]];
+  var sec = $(".st-sec", demo), metin = $(".st-metin", demo), oyn = $(".st-oynat", demo), saat = $(".st-saat", demo),
+      durum = $(".st-durum", demo), anz = $(".st-analiz", demo), bas = $(".st-bastan", demo),
+      RAW = $('[data-k="raw"]', demo), KUR = $('[data-k="kurgu"]', demo), bos = $(".st-bos", demo);
+  var D = null, buf = null, ctx = null, analizli = false, kipler = [], kaynak = [], cal = null, KW = [];
+  var PX = 1;           // saniye başına piksel (ikisi aynı ölçek)
+  var gor = { raw: 0, kur: 0 };   // görünür başlangıç (sn)
+  var renk = getComputedStyle(document.documentElement);
+  function sure(t){ t = Math.max(0, t); return Math.floor(t / 60) + ":" + ("0" + Math.floor(t % 60)).slice(-2); }
+  function oynatSimge(c){ oyn.innerHTML = c ? '<svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a.9.9 0 0 0 1.4.8l10-6.4a.9.9 0 0 0 0-1.6l-10-6.4A.9.9 0 0 0 8 5.6z"/></svg>'; oyn.setAttribute("aria-label", c ? "Durdur" : "Oynat"); }
+  ORN.forEach(function(o, i){ var b = h("button", null, o[1]); b.type = "button"; b.setAttribute("role", "tab");
+    b.onclick = function(){ yukle(o[0]); }; sec.appendChild(b); b.dataset.ad = o[0]; });
+  function kurguHesapla(){   // klipler kurgu zamanına göre art arda (geri alınan hatalar araya girer)
+    var t = 0; kipler.sort(function(a, b){ return a.r0 - b.r0; }); kipler.forEach(function(k){ k.k0 = t; t += k.r1 - k.r0; k.k1 = t; }); return t; }
+  function kurguSure(){ return kipler.length ? kipler[kipler.length - 1].k1 : 0; }
+  function cizRaw(){
+    var c = $("canvas", RAW), w = RAW.clientWidth, hh = RAW.clientHeight, dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr; c.height = hh * dpr; var g = c.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, w, hh);
+    if (!D) return;
+    var soft = renk.getPropertyValue("--soft").trim() || "#999", rose = renk.getPropertyValue("--rose").trim() || "#e0566a";
+    // kurguya giren kaynaklar hafif zemin, hatalar kırmızı zemin
+    if (analizli){
+      kipler.forEach(function(k){ var x = (k.r0 - gor.raw) * PX; g.fillStyle = "rgba(31,60,255,.10)"; g.fillRect(x, 0, (k.r1 - k.r0) * PX, hh); });
+      D.hatalar.forEach(function(e){ if (e.alindi) return; var x = (e.r0 - gor.raw) * PX; g.fillStyle = "rgba(224,86,106,.20)"; g.fillRect(x, 3, Math.max(2, (e.r1 - e.r0) * PX), hh - 6);
+        g.strokeStyle = rose; g.lineWidth = 1; g.strokeRect(x + .5, 3.5, Math.max(2, (e.r1 - e.r0) * PX) - 1, hh - 7); });
     }
-    await w(900);
-    KW.forEach(function(k){ k.classList.remove("on"); }); kph.style.opacity = 0; rph.style.opacity = 0;
-    HK.forEach(function(q){ q[0].style.left = q[1][1] + "%"; });
-    phase.textContent = "Kurgu hazır · hatalar RAW'da"; await w(2200);
-    lane.style.opacity = 0; await w(500);
+    var adim = D.tepe_adim, mid = hh / 2;
+    for (var x = 0; x < w; x++){
+      var t = gor.raw + x / PX, i = Math.floor(t / adim); if (i < 0 || i >= D.tepeler.length) continue;
+      var v = Math.min(1, D.tepeler[i] / D.tmax) * (mid - 6);
+      var hata = analizli && D.hatalar.some(function(e){ return !e.alindi && t >= e.r0 && t <= e.r1; });
+      g.fillStyle = hata ? rose : soft; g.fillRect(x, mid - v, 1, Math.max(1, v * 2));
+    }
+  }
+  function cizKurgu(){
+    var c = $("canvas", KUR), w = KUR.clientWidth, hh = KUR.clientHeight, dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr; c.height = hh * dpr; var g = c.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, w, hh);
+    if (!D || !analizli) return;
+    var mid = hh / 2, adim = D.tepe_adim;
+    var gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, "#00c6ff"); gr.addColorStop(.52, "#1f3cff"); gr.addColorStop(1, "#7a2cf0");
+    kipler.forEach(function(k){
+      var x0 = (k.k0 - gor.kur) * PX, x1 = (k.k1 - gor.kur) * PX; if (x1 < 0 || x0 > w) return;
+      g.fillStyle = k.geri ? "rgba(33,164,107,.18)" : "rgba(31,60,255,.12)"; g.fillRect(x0 + .5, 4, x1 - x0 - 1, hh - 8);
+      g.fillStyle = k.geri ? "#21a46b" : gr;
+      for (var x = Math.max(0, Math.floor(x0)); x < Math.min(w, x1); x++){
+        var t = k.r0 + (x - x0) / PX, i = Math.floor(t / adim); if (i < 0 || i >= D.tepeler.length) continue;
+        var v = Math.min(1, D.tepeler[i] / D.tmax) * (mid - 6); g.fillRect(x, mid - v, 1, Math.max(1, v * 2)); }
+    });
+  }
+  function ciz(){ cizRaw(); cizKurgu(); }
+  function olcek(){ var w = KUR.clientWidth || 600; PX = w / (analizli ? Math.max(kurguSure(), 10) : D.raw_sure); }
+  function yukle(ad){
+    durdur(); analizli = false; anz.disabled = true; anz.hidden = false; bas.hidden = true; bos.hidden = false;
+    sec.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.ad === ad ? "true" : "false"); });
+    durum.textContent = "Yükleniyor…";
+    Promise.all([fetch("ornek/" + ad + ".json").then(function(r){ return r.json(); }),
+                 fetch("ornek/" + ad + ".m4a").then(function(r){ return r.arrayBuffer(); })]).then(function(x){
+      D = x[0]; ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      return new Promise(function(res, rej){ ctx.decodeAudioData(x[1], res, rej); });
+    }).then(function(b){
+      buf = b; D.hatalar.forEach(function(e){ e.alindi = false; });
+      D.tmax = Math.max(1, D.tepeler.slice().sort(function(a, b){ return a - b; })[Math.floor(D.tepeler.length * .98)]);
+      kipler = D.klipler.map(function(k){ return { r0: k.r0, r1: k.r1 }; }); kurguHesapla();
+      metin.innerHTML = ""; KW = D.kelimeler.map(function(k){ var sp = h("span", "kw"); sp.textContent = k.w; metin.appendChild(sp); metin.appendChild(document.createTextNode(" ")); return sp; });
+      gor.raw = 0; gor.kur = 0; olcek(); ciz(); saat.textContent = "0:00"; anz.disabled = false;
+      durum.textContent = "RAW kaydı dinleyin: tekrarlar, nefesler, hatalar içinde. Sonra analiz edin.";
+    }).catch(function(){ durum.textContent = "Örnek yüklenemedi."; });
+  }
+  // --- çalma ---
+  function durdur(){ if (!cal) return; cal.kaynaklar.forEach(function(s){ try { s.stop(); } catch(e){} }); cancelAnimationFrame(cal.raf); cal = null; oynatSimge(false);
+    $(".st-ib", RAW).classList.remove("on"); $(".st-ib", KUR).classList.remove("on"); KW.forEach(function(k){ k.classList.remove("on"); }); }
+  function oynat(bas0){
+    if (!buf) return; if (ctx.state === "suspended") ctx.resume();
+    durdur(); var simdi = ctx.currentTime + .05, kay = [];
+    if (!analizli){
+      var s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination); s.start(simdi, bas0 || 0); kay.push(s);
+      cal = { kip: "raw", t0: simdi - (bas0 || 0), kaynaklar: kay }; s.onended = function(){ if (cal && cal.kaynaklar === kay) durdur(); };
+    } else {
+      var t = bas0 || 0;
+      kipler.forEach(function(k){ if (k.k1 <= t) return; var bas = Math.max(k.k0, t), ofs = k.r0 + (bas - k.k0), uz = k.k1 - bas;
+        var s = ctx.createBufferSource(), gn = ctx.createGain(); s.buffer = buf; s.connect(gn); gn.connect(ctx.destination);
+        var at = simdi + (bas - t); gn.gain.setValueAtTime(0, at); gn.gain.linearRampToValueAtTime(1, at + .008);
+        gn.gain.setValueAtTime(1, at + uz - .01); gn.gain.linearRampToValueAtTime(0, at + uz); s.start(at, ofs, uz); kay.push(s); });
+      cal = { kip: "kurgu", t0: simdi - t, kaynaklar: kay };
+    }
+    oynatSimge(true); var son = analizli ? kurguSure() : D.raw_sure;
+    (function adim(){ if (!cal) return; var t = ctx.currentTime - cal.t0; if (t >= son){ durdur(); return; }
+      goster(t); cal.raf = requestAnimationFrame(adim); })();
+  }
+  function goster(t){
+    saat.textContent = sure(t); var w = KUR.clientWidth;
+    if (cal && cal.kip === "raw"){
+      var ib = $(".st-ib", RAW); ib.classList.add("on"); ib.style.left = ((t - gor.raw) * PX) + "px";
+    } else {
+      // kurgu görünümü sayfa sayfa; RAW, çalan kaynak kurgu imlecinin tam altında kalacak biçimde kayar
+      if ((t - gor.kur) * PX > w * .9 || t < gor.kur){ gor.kur = Math.max(0, t - (w * .1) / PX); }
+      var x = (t - gor.kur) * PX, k = kipler.find(function(q){ return t >= q.k0 && t < q.k1; });
+      if (k){ var rt = k.r0 + (t - k.k0); gor.raw = rt - x / PX; }
+      var ibk = $(".st-ib", KUR), ibr = $(".st-ib", RAW); ibk.classList.add("on"); ibr.classList.add("on");
+      ibk.style.left = x + "px"; ibr.style.left = x + "px"; ciz();
+      // metinde kelime takibi (kelime zamanları kurgu zamanı; geri alınanlar öncesindeki kaymayı yok sayar: yaklaşık)
+      var oran = t / kurguSure(), hedef = oran * D.kurgu_sure, ki = -1;
+      for (var i = 0; i < D.kelimeler.length; i++){ if (D.kelimeler[i].t <= hedef) ki = i; else break; }
+      KW.forEach(function(sp, i){ sp.classList.toggle("on", i === ki); sp.classList.toggle("ok", i < ki); });
+      if (ki >= 0){ var sp = KW[ki], ust = sp.offsetTop - metin.clientHeight * .35; if (Math.abs(metin.scrollTop - ust) > 24) metin.scrollTop = ust; }
+    }
+  }
+  oyn.onclick = function(){ if (cal) durdur(); else oynat(cal ? 0 : (analizli ? 0 : 0)); };
+  // kanala tık: oradan çal
+  RAW.addEventListener("click", function(ev){ if (!D || analizli) return; var x = ev.offsetX; oynat(gor.raw + x / PX); });
+  KUR.addEventListener("click", function(ev){ if (!D || !analizli) return; oynat(gor.kur + ev.offsetX / PX); });
+  // RAW'da kırmızıya çift tık: kurguya al
+  RAW.addEventListener("dblclick", function(ev){ if (!D || !analizli) return; var t = gor.raw + ev.offsetX / PX;
+    var e = D.hatalar.find(function(q){ return !q.alindi && t >= q.r0 - .05 && t <= q.r1 + .05; }); if (!e) return;
+    durdur(); e.alindi = true; kipler.push({ r0: e.r0, r1: e.r1, geri: true }); kurguHesapla(); olcek(); ciz();
+    durum.textContent = "«" + e.ad + "» kurguya alındı. Kurguyu dinleyip farkı duyun.";
   });
+  // analiz et: kısa tarama, sonra hazır sonuç
+  anz.onclick = function(){ if (!D) return; durdur(); anz.disabled = true; durum.textContent = "Metinle eşleştiriliyor…";
+    var ib = $(".st-ib", RAW); ib.classList.add("on"); var t0 = performance.now(), w = RAW.clientWidth;
+    (function tara(){ var p = (performance.now() - t0) / 1800; ib.style.left = (Math.min(1, p) * w) + "px";
+      if (p < 1){ requestAnimationFrame(tara); return; }
+      ib.classList.remove("on"); analizli = true; bos.hidden = true; anz.hidden = true; bas.hidden = false; olcek(); gor.raw = 0; ciz();
+      var n = D.hatalar.length; durum.textContent = "Kurgu hazır · " + n + " yer kurguya girmedi (RAW'da kırmızı). Kurguyu dinleyin.";
+      oynat(0);
+    })();
+  };
+  bas.onclick = function(){ yukle(sec.querySelector('[aria-selected="true"]').dataset.ad); };
+  window.addEventListener("resize", function(){ if (D){ olcek(); ciz(); } });
+  yukle(ORN[0][0]);
+  return true;
 }
 
 /* ---------- rol anahtarı ---------- */
@@ -666,7 +779,6 @@ function rol(r, ilk){
   document.querySelectorAll("[data-r]").forEach(function(e){ var on = e.dataset.r === r; e.hidden = !on; if (on && !ilk){ e.classList.remove("fade"); void e.offsetWidth; e.classList.add("fade"); } });
   knobYer();
   var ed = r === "editor";                      // hero şeridi etiketleri
-  $("#hk1a").textContent = ed ? "yüklenen kayıt" : "kaydınız";
   var box = $("#adimlar"); box.innerHTML = "";
   ADIM[r].forEach(function(a, i){
     var s = h("div", "step" + (ilk ? "" : " fade"));
@@ -773,4 +885,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 21:59 -->
+<!-- yayin: 2026-11-16 22:24 -->
