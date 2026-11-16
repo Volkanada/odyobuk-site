@@ -1,0 +1,4 @@
+---
+deployment:
+  tasks:
+    - /bin/sh $HOME/repositories/odyobuk-site/yayinla.sh

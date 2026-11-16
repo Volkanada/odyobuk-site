@@ -1,0 +1,6 @@
+# odyobuk.com/dene: yalnız index.php açılır
+Options -Indexes
+DirectoryIndex index.php
+<FilesMatch "^(ortak|sil|cloudflare|ayar\.ornek)\.php$|\.(sql|md)$">
+  Require all denied
+</FilesMatch>

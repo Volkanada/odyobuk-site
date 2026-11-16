@@ -1,0 +1,328 @@
+<?php
+// odyobuk.com/dene: e-posta doğrulaması → deneme bileti → studio.odyobuk.com/dene. Tasarım: tasarim/DENEME_EPOSTA.md.
+// Stüdyo e-posta adresini hiç görmez: bilette yalnız opak kimlik (e-postanın tuzla özeti) var.
+declare(strict_types=1);
+require __DIR__ . '/ortak.php';
+
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+// strict-origin: no-referrer'da tarayıcı stüdyoya giden form POST'unda «Origin: null» yollar, stüdyo da null'u reddeder
+header('Referrer-Policy: strict-origin');
+header('Cache-Control: no-store');
+$studio = rtrim(ayar()['studio_url'], '/');
+header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; "
+     . "img-src 'self' data:; form-action 'self' $studio; frame-ancestors 'none'; base-uri 'none'");
+
+temizle();
+$adim = $_POST['adim'] ?? '';
+$ip = istemci_ip();
+$eposta_oz = fn(string $norm): string => ozet(ayar()['ozet_tuzu'], 'e|' . $norm);
+$ileti = ''; $hata = ''; $gorunum = 'eposta'; $eposta_goster = ''; $bilet = ''; $soru = '';
+$kisi = oturum_kisi();
+if ($kisi) { $gorunum = 'hazir'; }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_dogru()) { $hata = 'Sayfanın süresi doldu; yeniden deneyin.'; $gorunum = $kisi ? 'hazir' : 'eposta'; }
+
+    elseif ($adim === 'kod_iste') {
+        $ham = (string)($_POST['eposta'] ?? '');
+        $norm = eposta_norm($ham);
+        if (!eposta_gecerli($ham) || !eposta_gecerli($norm)) { $hata = 'Geçerli bir e-posta adresi yazın.'; }
+        elseif (empty($_POST['kvkk'])) { $hata = 'Devam etmek için aydınlatma metnini onaylayın.'; }
+        else {
+            $oz = $eposta_oz($norm);
+            $eposta_goster = $ham;
+            // Kod hakkı sınırsız, kitlenme yok. Kötüye kullanıma karşı: her POST önce IP başına istek
+            // sayacına düşer (tek IP uçları dövemesin); sonra haklar ATOMİK olarak SIRAYLA ayrılır (eş zamanlı istekler
+            // hiçbir sınırı birlikte atlayamaz); bir sonraki reddederse ya da gönderim başarısız olursa ayrılanlar geri verilir.
+            // Genel tavan (herkesi etkileyen) EN SON, yalnız gerçekten gönderilecekken düşülür.
+            if (!hiz('kod_istek_ip', $ip, 3600, 60)) {
+                $hata = 'Bu internet bağlantısından çok istek geldi; bir saat sonra yeniden deneyin ya da info@odyobuk.com\'a yazın.';
+                goto bitti;
+            }
+            $ayrilan = [];                                   // [tur, anahtar, pencere]
+            $geri = function () use (&$ayrilan, $oz): void {
+                foreach ($ayrilan as [$t, $a, $p]) { if ($t === 'kv') { kv_sil($a); } else { sayac_geri($t, $a, $p); } }
+                $ayrilan = [];
+            };
+            //  1) aynı adrese iki gönderim arası en az 60 sn (kod ekranında geri sayım)
+            $ara = (int)(ayar()['kod_arasi_sn'] ?? 60);
+            if ($ara > 0) {
+                if (!kv_al('kod_son|' . $oz, $ara)) {
+                    $son = kv_oku('kod_son|' . $oz); $bekle = $son ? max(1, $son[1] - time()) : $ara; $gorunum = 'kod';
+                    $hata = "Yeni kod için $bekle sn bekleyin; son gönderdiğimiz kod hâlâ geçerli.";
+                    goto bitti;
+                }
+                $ayrilan[] = ['kv', 'kod_son|' . $oz, 0];
+            }
+            //  2) 15 dk'da 3'ten sonra doğrulama sorusu (çereze bağlı, tek kullanım, 5 dk)
+            if (hiz('kod_e15', $oz, 900, 3)) { $ayrilan[] = ['kod_e15', $oz, 900]; }
+            else {
+                if (!isset($_POST['dogrulama']) || !soru_dogru((string)$_POST['dogrulama'])) {
+                    if (isset($_POST['dogrulama'])) { $hata = 'Yanıt yanlış ya da süresi doldu; yeni soruyu yanıtlayın.'; }
+                    $geri(); $soru = soru_uret(); $gorunum = 'soru'; goto bitti;
+                }
+                hiz('kod_e15', $oz, 900, 100000); $ayrilan[] = ['kod_e15', $oz, 900];
+            }
+            //  3) adres başına günde 20, 4) IP (/64) başına saatte 10, 5) genel saatte 200 — hepsi atomik
+            if (!hiz('kod_egun', $oz, 86400, 20)) {
+                $geri(); $hata = 'Bugün bu adrese çok kod gönderildi; yarın yeniden deneyin ya da info@odyobuk.com\'a yazın.';
+                goto bitti;
+            }
+            $ayrilan[] = ['kod_egun', $oz, 86400];
+            if (!hiz('kod_ip', $ip, 3600, 10)) {
+                $geri(); $hata = 'Bu internet bağlantısından çok kod istendi; bir saat sonra yeniden deneyin ya da info@odyobuk.com\'a yazın.';
+                goto bitti;
+            }
+            $ayrilan[] = ['kod_ip', $ip, 3600];
+            if (!hiz('kod_genel', 'hepsi', 3600, (int)(ayar()['saatlik_posta_tavani'] ?? 200))) {
+                $geri(); $hata = 'Şu an çok yoğunuz; birkaç dakika sonra yeniden deneyin.';
+                goto bitti;
+            }
+            $ayrilan[] = ['kod_genel', 'hepsi', 3600];
+            // kod, onu isteyen tarayıcıya bağlanır: doğrulama yalnız bu çerezle (başkası başkasının adresine tahmin yollayamaz).
+            // Çerez yalnız kod gerçekten gönderilince yenilenir (önceki geçerli kod boşuna ölmesin).
+            $tarayici = b64(random_bytes(24));
+            $kod = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $govde = "Merhaba,\n\nOdyobuk Studio ücretsiz deneme kodunuz:\n\n    $kod\n\nKodu odyobuk.com/dene sayfasına yazın. "
+                   . "10 dakika geçerlidir.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.\n\n"
+                   . "Odyobuk Studio · Bir Seslendirme Evi ürünü\nhttps://odyobuk.com\n";
+            if (!posta_gonder($ham, "Odyobuk Studio deneme kodunuz: $kod", $govde)) {
+                error_log('odyobuk-deneme: kod gönderilemedi');
+                $geri();                                     // hiçbir hak sayılmaz, 60 sn kilidi de kalkar
+                $hata = 'Kod gönderilemedi; birkaç dakika sonra yeniden deneyin.';     // hak sayılmaz, eski kod geçerli kalır
+                $gorunum = 'eposta';
+                goto bitti;
+            }
+            // yalnız BU tarayıcının eski kodu ve süresi dolanlar silinir: başka tarayıcıdan aynı adrese istek, elinizdeki
+            // geçerli kodu öldürmez (kod zaten tarayıcı çerezine bağlı)
+            $eski_t = ozet(ayar()['ozet_tuzu'], 't|' . (string)($_COOKIE['od_kod'] ?? ''));
+            db()->prepare('DELETE FROM deneme_kod WHERE eposta_ozet = ? AND (tarayici_ozet = ? OR bitis < ?)')->execute([$oz, $eski_t, time()]);
+            db()->prepare('INSERT INTO deneme_kod (eposta_ozet, kod_ozet, tarayici_ozet, bitis, yanlis, olusturma) VALUES (?, ?, ?, ?, 0, ?)')
+                ->execute([$oz, ozet(ayar()['kod_biberi'], $kod), ozet(ayar()['ozet_tuzu'], 't|' . $tarayici), time() + KOD_OMUR, time()]);
+            setcookie('od_kod', $tarayici, ['path' => '/dene', 'secure' => guvenli(), 'httponly' => true, 'samesite' => 'Strict']);
+            setcookie('od_duyuru', empty($_POST['duyuru']) ? '0' : '1', ['path' => '/dene', 'secure' => guvenli(), 'httponly' => true, 'samesite' => 'Strict']);
+            $ileti = '';   // kod ekranı kendi iletisini gösterir (adres + spam notu)
+            $gorunum = 'kod'; $eposta_goster = $ham;
+        }
+    }
+
+    elseif ($adim === 'kod_dogrula') {
+        $ham = (string)($_POST['eposta'] ?? ''); $norm = eposta_norm($ham);
+        $kod = preg_replace('/\D/', '', (string)($_POST['kod'] ?? ''));
+        $eposta_goster = $ham; $gorunum = 'kod';
+        if (!hiz('dogrula_ip', $ip, 3600, 20)) { $hata = 'Çok fazla deneme yapıldı; bir süre sonra yeniden deneyin.'; }
+        elseif (!eposta_gecerli($norm) || strlen($kod) !== 6) { $hata = 'Kod yanlış ya da süresi dolmuş.'; }
+        else {
+            $oz = $eposta_oz($norm);
+            $tz = ozet(ayar()['ozet_tuzu'], 't|' . (string)($_COOKIE['od_kod'] ?? ''));
+            $s = db()->prepare('SELECT * FROM deneme_kod WHERE eposta_ozet = ? AND tarayici_ozet = ? AND bitis > ? ORDER BY id DESC LIMIT 1');
+            $s->execute([$oz, $tz, time()]);
+            $k = $s->fetch();
+            // deneme hakkı önce ATOMİK olarak düşülür (eş zamanlı tahminler 5 sınırını aşamasın), sonra karşılaştırılır
+            $hak = false;
+            if ($k) {
+                $u = db()->prepare('UPDATE deneme_kod SET yanlis = yanlis + 1 WHERE id = ? AND yanlis < ?');
+                $u->execute([$k['id'], KOD_YANLIS]);
+                $hak = $u->rowCount() === 1;
+            }
+            // Adres çapında saatlik yanlış kilidi YOK (başkası kendi tarayıcısından yanlış girerek kurbanın
+            // adresini kilitleyemesin). Tahmini sınırlayan: kod başına 5 atomik hak + adres başına günde 20 kod + IP sınırları.
+            if (!$k || !$hak) { $hata = 'Kod yanlış ya da süresi dolmuş. Yeni kod isteyin.'; }
+            elseif (!hash_equals($k['kod_ozet'], ozet(ayar()['kod_biberi'], $kod))) {
+                $hata = 'Kod yanlış ya da süresi dolmuş.';
+            } else {
+                db()->prepare('DELETE FROM deneme_kod WHERE eposta_ozet = ?')->execute([$oz]);
+                $s = db()->prepare('SELECT * FROM deneme_kisi WHERE eposta_ozet = ?'); $s->execute([$oz]);
+                $var = $s->fetch();
+                $duyuru = ($_COOKIE['od_duyuru'] ?? '0') === '1' ? 1 : 0;
+                if ($var) {
+                    db()->prepare('UPDATE deneme_kisi SET dogrulama = ?, kvkk_onay = ?, duyuru_onay = ? WHERE id = ?')
+                        ->execute([time(), time(), max($duyuru, (int)$var['duyuru_onay']), $var['id']]);
+                    $kid = (int)$var['id'];
+                } else {
+                    try {
+                        db()->prepare('INSERT INTO deneme_kisi (eposta, eposta_ozet, kimlik, dogrulama, kvkk_onay, duyuru_onay, deneme_sayisi, olusturma)
+                            VALUES (?, ?, ?, ?, ?, ?, 0, ?)')->execute([$norm, $oz, kimlik($norm), time(), time(), $duyuru, time()]);
+                        $kid = (int)db()->lastInsertId();
+                    } catch (PDOException $e) {        // eş zamanlı iki doğrulama: öbürü kaydı açmış
+                        $s = db()->prepare('SELECT id FROM deneme_kisi WHERE eposta_ozet = ?'); $s->execute([$oz]);
+                        $kid = (int)($s->fetch()['id'] ?? 0);
+                        if (!$kid) { throw $e; }
+                    }
+                }
+                oturum_ac($kid);
+                header('Location: /dene/', true, 303);
+                exit;
+            }
+        }
+    }
+
+    elseif ($adim === 'bilet' && $kisi) {
+        // kimlik başına dakikada 3 / saatte 20 bilet
+        if (!hiz('bilet_k1', $kisi['kimlik'], 60, 3) || !hiz('bilet_k60', $kisi['kimlik'], 3600, 20)) {
+            $hata = 'Çok sık deneme başlatıldı; bir dakika sonra yeniden deneyin.'; $gorunum = 'hazir';
+        } else {
+            db()->prepare('UPDATE deneme_kisi SET son_deneme = ?, deneme_sayisi = deneme_sayisi + 1 WHERE id = ?')->execute([time(), $kisi['id']]);
+            $bilet = bilet($kisi['kimlik']); $gorunum = 'git';
+        }
+    }
+
+    elseif ($adim === 'cikis') { oturum_kapat(); $kisi = null; $gorunum = 'eposta'; $ileti = 'Bu tarayıcıdaki oturum kapatıldı.'; }
+
+    elseif ($adim === 'sil' && $kisi) {
+        // kullanıcı isteğiyle silme: oturum e-postanın sahibi olduğunu zaten kanıtladı (son 30 günde kodla doğrulandı)
+        kisi_sil($kisi['eposta_ozet']); oturum_kapat(); $kisi = null; $gorunum = 'eposta';
+        $ileti = 'E-posta adresiniz ve deneme kayıtlarınız silindi.';
+    }
+}
+bitti:
+$csrf = csrf();
+?><!doctype html>
+<html lang="tr" data-tema="sepya">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Ücretsiz deneme — Odyobuk Studio</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+html{touch-action:pan-x pan-y}      /* telefonda iki parmakla yakınlaştırma kapalı (giriş ekranıyla aynı) */
+/* odyobuk.com dili: Newsreader başlık, logo renk geçişi; temalar Beyaz · Sepya · Koyu (tanitim/site/index.html ile aynı) */
+@font-face{font-family:'Newsreader';font-style:normal;font-weight:400 600;font-display:swap;src:url(/fonts/newsreader-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Newsreader';font-style:normal;font-weight:400 600;font-display:swap;src:url(/fonts/newsreader-latinext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+:root{--bg:#fff;--bg2:#f4f6fb;--card:#fff;--line:#e6e9f1;--line2:#d3d7e4;--text:#14162a;--muted:#5b6078;--soft:#8a8fa6;--input:#fff;
+  --c1:#00c6ff;--c2:#1f3cff;--c3:#7a2cf0;--grad:linear-gradient(120deg,var(--c1) 0%,var(--c2) 52%,var(--c3) 100%);
+  --err:#d63c52;--errbg:#fdeef0;--ok:#21a46b;--okbg:#e8f6ef;
+  --serif:"Newsreader",ui-serif,"Iowan Old Style",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+:root[data-tema="sepya"]{--bg:#f6efe2;--bg2:#efe6d4;--card:#fbf7ee;--line:#e4d8c1;--line2:#d3c3a5;--text:#2e2418;--muted:#6b5b46;--soft:#95836a;--input:#fffdf8;--okbg:#e6efd9}
+:root[data-tema="koyu"]{--bg:#0d0e18;--bg2:#141626;--card:#171a2c;--line:#252a40;--line2:#323852;--text:#eef0fa;--muted:#a6abc4;--soft:#7d8299;--input:#11131f;
+  --errbg:#3a1820;--err:#ff7a8c;--okbg:#12301f;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+body:before{content:"";position:fixed;left:50%;top:-140px;width:900px;height:620px;transform:translateX(-50%);background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 12%,transparent),transparent);z-index:-1;pointer-events:none}
+a{color:inherit}
+.ust{display:flex;align-items:center;justify-content:space-between;padding:20px 28px}
+.ust a{font-size:14px;color:var(--muted);text-decoration:none}.ust a:hover{color:var(--text)}
+main{flex:1;width:min(440px,100%);margin:0 auto;padding:4vh 16px 40px}
+.marka{text-align:center;margin-bottom:22px}
+.marka img{width:56px;height:56px;display:block;margin:0 auto 12px;filter:drop-shadow(0 10px 22px rgba(31,60,255,.25))}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;letter-spacing:-.01em;margin:0;line-height:1.15}
+.alt{margin:6px 0 0;color:var(--muted);font-size:15px}
+.adimlar{display:flex;justify-content:center;gap:6px;margin:16px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--soft)}
+.adimlar li{display:flex;align-items:center;gap:6px}.adimlar li+li:before{content:"";width:18px;height:1px;background:var(--line2)}
+.adimlar b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:1px solid var(--line2);color:var(--soft);font-weight:600}
+.adimlar .on{color:var(--text)}.adimlar .on b{background:var(--grad);border:0;color:#fff}
+.adimlar .bitti b{background:var(--ok);border:0;color:#fff}
+.kart{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;display:flex;flex-direction:column;gap:16px;
+  box-shadow:0 1px 2px rgba(20,22,42,.04),0 24px 48px -28px rgba(31,60,255,.28)}
+form{display:flex;flex-direction:column;gap:16px;margin:0}
+label{display:flex;flex-direction:column;gap:7px;font-size:13.5px;font-weight:500;color:var(--muted)}
+input[type=email],input[type=text]{font:inherit;font-size:16px;color:var(--text);background:var(--input);border:1px solid var(--line2);border-radius:11px;padding:12px 14px;width:100%}
+input:focus{outline:none;border-color:var(--c2);box-shadow:0 0 0 4px color-mix(in srgb,var(--c2) 14%,transparent)}
+input.kod{font-size:26px;letter-spacing:.5em;text-align:center;font-variant-numeric:tabular-nums;padding:12px 0 12px .5em}
+.onay{flex-direction:row;align-items:flex-start;gap:10px;font-weight:400;font-size:13.5px;line-height:1.45}
+.onay input{margin:2px 0 0;width:17px;height:17px;flex:none;accent-color:var(--c2)}
+.onay a{color:var(--c2)}
+button.ana{font:600 16px var(--sans);color:#fff;background:var(--grad);border:0;border-radius:12px;padding:13px 16px;cursor:pointer;box-shadow:0 10px 22px -12px rgba(31,60,255,.7)}
+button.ana:hover{filter:brightness(1.08)}
+button.ikinci{font:500 13.5px var(--sans);color:var(--muted);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0}
+button.ikinci:hover{color:var(--text)}
+button.ikinci:disabled{opacity:.55;cursor:default;text-decoration:none}
+.hata{color:var(--err);background:var(--errbg);border-radius:10px;padding:9px 12px;font-size:14px}
+.ileti{color:var(--muted);font-size:14px;line-height:1.5}
+.ileti.ok{color:var(--text);background:var(--okbg);border-radius:10px;padding:10px 12px}
+.ileti b{color:var(--text)}
+.satir{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.not{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:13px;line-height:1.5;margin:20px 4px 0}
+.not svg{flex:none;margin-top:2px;color:var(--c2)}
+.beta{text-align:center;color:var(--soft);font-size:12.5px;margin-top:14px}
+footer{text-align:center;color:var(--soft);font-size:12.5px;padding:18px}
+</style>
+</head>
+<body>
+<div class="ust"><a href="/">← odyobuk.com</a></div>
+<main>
+<?php $adimno = $gorunum === 'eposta' ? 1 : ($gorunum === 'kod' ? 2 : 3); ?>
+<div class="marka">
+  <img src="data:image/png;base64,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" alt="">
+  <h1>Ücretsiz deneme</h1>
+  <p class="alt">1 dakikalık kayıtla Odyobuk Studio'yu deneyin · kurulum yok</p>
+  <ol class="adimlar" aria-label="Adımlar">
+    <li class="<?= $adimno === 1 ? 'on' : 'bitti' ?>"><b><?= $adimno > 1 ? '✓' : '1' ?></b>E-posta</li>
+    <li class="<?= $adimno === 2 ? 'on' : ($adimno > 2 ? 'bitti' : '') ?>"><b><?= $adimno > 2 ? '✓' : '2' ?></b>Kod</li>
+    <li class="<?= $adimno === 3 ? 'on' : '' ?>"><b>3</b>Deneme</li>
+  </ol>
+</div>
+<div class="kart">
+<?php if ($hata): ?><div class="hata" role="alert"><?= h($hata) ?></div><?php endif; ?>
+<?php if ($ileti): ?><div class="ileti"><?= h($ileti) ?></div><?php endif; ?>
+
+<?php if ($gorunum === 'git'): ?>
+  <div class="ileti">Studio açılıyor…</div>
+  <form method="post" action="<?= h($studio) ?>/dene/bilet" id="git">
+    <input type="hidden" name="bilet" value="<?= h($bilet) ?>">
+    <button class="ana" type="submit">Denemeyi aç</button>
+  </form>
+  <script>document.getElementById("git").submit();</script>
+
+<?php elseif ($gorunum === 'hazir'): ?>
+  <div class="ileti ok">E-postanız doğrulandı. Denemeyi dilediğiniz kadar başlatabilirsiniz; bu tarayıcı 30 gün hatırlanır.</div>
+  <form method="post"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="bilet">
+    <button class="ana" type="submit">Denemeyi başlat</button></form>
+  <div class="satir">
+    <form method="post"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="cikis">
+      <button class="ikinci" type="submit">Bu tarayıcıda oturumu kapat</button></form>
+    <form method="post" onsubmit="return confirm('E-posta adresiniz ve deneme kayıtlarınız kalıcı olarak silinsin mi?')">
+      <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="sil">
+      <button class="ikinci" type="submit">E-postamı ve kayıtlarımı sil</button></form>
+  </div>
+
+<?php elseif ($gorunum === 'kod'): ?>
+  <div class="ileti">Kod gönderildi: <b><?= h($eposta_goster) ?></b> adresine 6 haneli bir kod yolladık. Birkaç dakika
+    içinde gelmezse istenmeyen (spam) klasörüne bakın. Bu tarayıcıdan birden çok kez istediyseniz yalnız en son gelen kod geçerlidir.</div>
+  <form method="post">
+    <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="kod_dogrula">
+    <input type="hidden" name="eposta" value="<?= h($eposta_goster) ?>">
+    <label>Doğrulama kodu<input class="kod" type="text" name="kod" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="••••••" required autofocus></label>
+    <button class="ana" type="submit">Doğrula</button>
+  </form>
+<?php $bk = ($x = kv_oku('kod_son|' . $eposta_oz(eposta_norm($eposta_goster)))) ? max(0, $x[1] - time()) : 0; ?>
+  <form method="post"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="kod_iste">
+    <input type="hidden" name="eposta" value="<?= h($eposta_goster) ?>"><input type="hidden" name="kvkk" value="1">
+    <input type="hidden" name="duyuru" value="<?= ($_COOKIE['od_duyuru'] ?? '0') === '1' ? '1' : '' ?>">
+    <button class="ikinci" type="submit" id="yeniden" data-kalan="<?= (int)$bk ?>">Kodu yeniden gönder</button></form>
+  <form method="post"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><button class="ikinci" type="submit">Başka bir e-posta yaz</button></form>
+  <script>(function () { const b = document.getElementById("yeniden"); let k = +b.dataset.kalan;
+    const yaz = () => { b.disabled = k > 0; b.textContent = k > 0 ? `Kodu yeniden gönder (${k})` : "Kodu yeniden gönder"; };
+    yaz(); if (k > 0) { const t = setInterval(() => { k--; yaz(); if (k <= 0) clearInterval(t); }, 1000); } })();</script>
+
+<?php elseif ($gorunum === 'soru'): ?>
+  <div class="ileti">Bu adrese kısa sürede birkaç kod gönderdik. Yeni kod için kısa bir doğrulama:</div>
+  <form method="post">
+    <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="kod_iste">
+    <input type="hidden" name="eposta" value="<?= h($eposta_goster) ?>"><input type="hidden" name="kvkk" value="1">
+    <input type="hidden" name="duyuru" value="<?= ($_COOKIE['od_duyuru'] ?? '0') === '1' ? '1' : '' ?>">
+    <label>Doğrulama: <?= h($soru) ?> = ?<input type="text" name="dogrulama" inputmode="numeric" maxlength="3" autocomplete="off" required autofocus></label>
+    <button class="ana" type="submit">Kodu yeniden gönder</button>
+  </form>
+
+<?php else: ?>
+  <form method="post">
+    <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="kod_iste">
+    <label>E-posta adresiniz<input type="email" name="eposta" autocomplete="email" maxlength="254" placeholder="ornek@eposta.com" required autofocus></label>
+    <label class="onay"><input type="checkbox" name="kvkk" value="1" required><span>E-posta adresimin deneme için işlenmesine ilişkin
+      <a href="/aydinlatma.html" target="_blank" rel="noopener">aydınlatma metnini</a> okudum.</span></label>
+    <label class="onay"><input type="checkbox" name="duyuru" value="1"><span>Odyobuk Studio duyurularını e-postayla almak
+      istiyorum. <span style="color:var(--soft)">(isteğe bağlı)</span></span></label>
+    <button class="ana" type="submit">Kod gönder</button>
+  </form>
+<?php endif; ?>
+</div>
+<p class="not"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+  <span>E-posta adresiniz yalnız Seslendirme Evi'nin kayıtlarında tutulur; deneme sesinizin ve metninizin işlendiği stüdyo
+  sunucusuna gönderilmez. Dilediğinizde «E-postamı ve kayıtlarımı sil» ile silebilirsiniz.</span></p>
+<p class="beta">Odyobuk Studio şu an beta sürümünde · dakika ve paket satın alma yakında</p>
+</main>
+<footer>© 2026 Odyobuk Studio · Bir Seslendirme Evi ürünü</footer>
+</body>
+</html>
