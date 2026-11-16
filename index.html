@@ -123,7 +123,16 @@ h1 em{font-style:italic}
 .demo{margin:56px auto 0;max-width:940px;padding:26px 28px 24px;text-align:left}
 .dtx{font-family:var(--serif);font-size:19px;line-height:1.6;color:var(--muted);margin:0 0 40px}
 .dtx .hl{color:var(--text);background:var(--tint);border-radius:4px;padding:1px 3px}
-.stage{position:relative;height:200px}
+.stage{position:relative;height:126px}
+.clip.hata{background:color-mix(in srgb,var(--rose) 20%,transparent);color:var(--rose);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--rose) 70%,transparent)}
+.demo .clip.hata .lbl{opacity:1}
+.clip.kaynak{opacity:.55}
+#rph,#kph{position:absolute;width:2px;z-index:4;opacity:0;transition:opacity .3s}
+#rph{top:3px;height:42px;background:color-mix(in srgb,var(--c2) 70%,transparent)}
+#kph{top:73px;height:56px;background:var(--c2)}
+#kph:before{content:"";position:absolute;top:-6px;left:-5px;border:6px solid transparent;border-top-color:var(--c2)}
+.dtx .kw{transition:background .15s,color .15s;border-radius:4px}
+.dtx .kw.on{background:var(--grad);color:#fff;padding:0 2px;margin:0 -2px}
 .phase{position:absolute;right:0;top:-28px;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
 .phase i{width:7px;height:7px;border-radius:50%;background:var(--grad)}
 .demo.done .clip.b .lbl,.demo.done .clip.n .lbl{opacity:0}
@@ -347,12 +356,11 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   <div class="card demo" id="demo" aria-label="Örnek: ham kayıt metne göre kurguya dönüşür">
     <p class="dtx">Ali sessizce masaya geçti, çayından azıcık içti. <span class="hl">Pencereden bahçedeki yaşlı ceviz ağacı görünüyordu.</span></p>
     <div class="stage">
-      <div class="phase"><i></i><span id="phase">Kaydınız</span></div>
-      <div class="row" style="top:0"><div class="lb"><b id="hk1">Kaydınız</b><span id="hk1a">raw kayıt</span></div><div class="tr"></div></div>
+      <div class="phase"><i></i><span id="phase">RAW kayıt</span></div>
+      <div class="row" style="top:0"><div class="lb"><b id="hk1">RAW Kayıt</b><span id="hk1a">kaydınız</span></div><div class="tr"></div></div>
       <div class="row" style="top:76px"><div class="lb"><b>Kurgu</b>editlenmiş</div><div class="tr"></div></div>
-      <div class="row alt" style="top:152px"><div class="lb"><b>Kurgu dışı</b>hatalar</div><div class="tr"></div></div>
       <div class="lane" id="lane"></div>
-      <div class="lane" style="pointer-events:none"><div id="hph"></div></div>
+      <div class="lane" style="pointer-events:none"><div id="hph"></div><div id="rph"></div><div id="kph"></div></div>
     </div>
   </div>
 </div>
@@ -399,14 +407,14 @@ var ADIM = {
   sanatci: [
     ["Yükle", "Kaydınızı olduğu gibi yükleyin", "Kendi stüdyonuzda, kendi programınızla okuduğunuz işlemsiz kaydı kesmeden biçmeden yükleyin; bölüm bölüm ya da tek parça.", ["Hata yapınca durmayın, baştan okuyun", "WAV, AIFF ya da FLAC"], "yukle"],
     ["Analiz", "“Analiz et”e basın, kahve makinenize de", "Odyobuk kaydınızı yazıya döker, kitap metniyle kelime kelime eşleştirir ve kurguyu kurar.", ["Kahveniz ve editiniz hazır", "Bölüm bölüm kurgu"], "kahve"],
-    ["Dinle, düzelt", "Normal ya da hızlı dinleyin, tek tıkla düzeltin", "Emin olunamayan yerler işaretlidir. 1,5× ya da 2× dinleyin; alta inmiş bir parçayı çift tıkla geri alın.", ["Ses tonu bozulmadan hızlı dinleme", "Önceki / sonraki işarete atlayın"], "dinle"],
+    ["Dinle, düzelt", "Normal ya da hızlı dinleyin, tek tıkla düzeltin", "Emin olunamayan yerler işaretlidir. 1,5× ya da 2× dinleyin; RAW kayıtta kırmızı görünen bir parçayı çift tıkla kurguya alın.", ["Ses tonu bozulmadan hızlı dinleme", "Önceki / sonraki işarete atlayın"], "dinle"],
     ["Teslim", "Kurguyu indirin, bitirin", "Bölüm bölüm ya da tüm kitap olarak dışa aktarın. Ham kaydınız olduğu gibi durur.", ["Bölüm ya da tüm kitap", "Ham kayıt silinmez"], "indir"]
   ],
   editor: [
     ["Kayıt", "Sanatçıdan gelen işlemsiz kaydı atın", "Uzun, tekrarlı, nefesli ham dosyaları olduğu gibi kitaba bırakın. Kesip biçmek yok.", ["Birden çok parça, tek kitap", "Bölümler metinden ayrılır"], "yukle"],
-    ["Analiz", "“Analiz et”e basın, kahve makinenize de", "Odyobuk sanatçının kaydını metinle eşleştirir: son okuma kurguya girer; yanlış okuma, nefes ve öksürük alt kanala iner.", ["Kahveniz ve sanatçının kaydı hazır", "Hiçbir parça silinmez"], "kahve"],
+    ["Analiz", "“Analiz et”e basın, kahve makinenize de", "Odyobuk sanatçının kaydını metinle eşleştirir: son okuma kurguya girer; yanlış okuma, nefes ve öksürük RAW kayıtta kırmızı kalır.", ["Kahveniz ve sanatçının kaydı hazır", "Hiçbir parça silinmez"], "kahve"],
     ["Dinle, düzelt", "Normal ya da hızlı dinleyin, tek tıkla düzeltin", "Yalnız işaretli yerleri dinleyin. Alta inmiş bir okumayı çift tıkla geri alın, kesim noktasını sürükleyin.", ["1,25× · 1,5× · 2× dinleme", "“Şu yerleri dinle” işaretleri"], "dinle"],
-    ["Revize", "Sanatçıdan metin üstünde revize isteyin", "Yanlış okunan yeri metinde seçin, notunuzu yazın. Sanatçıya Word ve örnek sesle gider; gelen revize kendiliğinden yerine oturur.", ["Yer seç → not yaz → gönder", "Revize gelince eski okuma alta iner"], "revize"],
+    ["Revize", "Sanatçıdan metin üstünde revize isteyin", "Yanlış okunan yeri metinde seçin, notunuzu yazın. Sanatçıya Word ve örnek sesle gider; gelen revize kendiliğinden yerine oturur.", ["Yer seç → not yaz → gönder", "Revize gelince eski okuma kurgudan çıkar"], "revize"],
     ["Teslim", "Kurguyu indirin, bitirin", "Bölüm bölüm ya da tüm kitap olarak dışa aktarın, teslim edin.", ["Bölüm ya da tüm kitap", "Ham kayıt ve revizeler arşivde"], "indir"]
   ]
 };
@@ -520,21 +528,24 @@ ANIM.kahve = async function(vz, w){
 
 ANIM.dinle = async function(vz, w){
   vz.innerHTML = '<div class="vh"><b>Kurgu · Bölüm 3</b><span class="spd"><span class="on">1×</span><span>1,25×</span><span>1,5×</span><span>2×</span></span></div>' +
-    '<div class="kst"><div class="row" style="top:0"><div class="lb"><b>Kurgu</b>editlenmiş</div><div class="tr"></div></div>' +
-    '<div class="row alt" style="top:80px"><div class="lb"><b>Kurgu dışı</b>hatalar</div><div class="tr"></div></div><div class="lane"></div></div>' +
+    '<div class="kst"><div class="row" style="top:0"><div class="lb"><b>RAW Kayıt</b>hatalar kırmızı</div><div class="tr"></div></div>' +
+    '<div class="row" style="top:80px"><div class="lb"><b>Kurgu</b>editlenmiş</div><div class="tr"></div></div><div class="lane"></div></div>' +
     '<div class="trp"><span>⏮</span><span class="pl">▶</span><span>■</span><span class="clk">0:00 / 3:12</span></div><div class="toast"></div>';
   var ln = $(".lane", vz), S = vz.querySelectorAll(".spd span"), clk = $(".clk", vz), to = $(".toast", vz), c = imlec(vz);
-  [[0,20],[21,17],[56,20],[77,22]].forEach(function(x){ var e = h("div", "clip k"); e.style.left = x[0] + "%"; e.style.width = x[1] + "%"; ln.appendChild(e); });
-  var gap = h("div", "clip b", '<span class="lbl">«bahçedeki» · son okuma</span>'); gap.style.left = "39%"; gap.style.width = "16%"; gap.style.top = "87px"; ln.appendChild(gap);
-  var fl = h("span", "flag", "dinle: eksik kelime"); fl.style.left = "37%"; ln.appendChild(fl);
-  var ph = h("div", "ph"); ph.style.left = "0%"; ln.appendChild(ph);
+  // RAW: bütün okumalar (doğrular gri kaynak, kurguya girmeyenler kırmızı); KURGU: temiz okuma, bir boşlukla
+  [[0,20],[21,17],[56,20],[77,22]].forEach(function(x){ var g = h("div", "clip g kaynak"); g.style.left = x[0] + "%"; g.style.width = x[1] + "%"; ln.appendChild(g);
+    var e = h("div", "clip k"); e.style.left = x[0] + "%"; e.style.width = x[1] + "%"; e.style.top = "87px"; ln.appendChild(e); });
+  var gap = h("div", "clip b hata", '<span class="lbl">«bahçedeki» · son okuma</span>'); gap.style.left = "39%"; gap.style.width = "16%"; gap.style.top = "7px"; ln.appendChild(gap);
+  var fl = h("span", "flag", "dinle: eksik kelime"); fl.style.left = "37%"; fl.style.top = "58px"; ln.appendChild(fl);
+  var ph = h("div", "ph"); ph.style.left = "0%"; ph.style.top = "76px"; ln.appendChild(ph);
   async function cal(a, b, hz){ for (var x = a; x <= b; x++){ ph.style.left = x + "%"; clk.textContent = sure(Math.round(x * 1.92)) + " / 3:12"; await w(70 / hz); } }
   await w(400); await cal(0, 14, 1);
   git(c, vz, S[2]); await w(800); await tikla(c, vz, w); S[0].classList.remove("on"); S[2].classList.add("on"); kenara(c);
   await cal(15, 37, 1.5);
   to.textContent = "İşaretli yer: burayı dinleyin"; to.classList.add("on"); await w(1300); to.classList.remove("on");
   git(c, vz, gap); await w(900); await tikla(c, vz, w, true);
-  gap.style.top = "7px"; gap.className = "clip k"; gap.querySelector(".lbl").style.opacity = 0; fl.style.opacity = 0;
+  var kopya = h("div", "clip k"); kopya.style.left = "39%"; kopya.style.width = "16%"; kopya.style.top = "7px"; ln.appendChild(kopya);
+  void kopya.offsetWidth; kopya.style.top = "87px"; gap.className = "clip g kaynak"; gap.querySelector(".lbl").style.opacity = 0; fl.style.opacity = 0;
   to.textContent = "Kurguya geri alındı · çift tık"; to.classList.add("on"); await w(1400); to.classList.remove("on"); kenara(c);
   await cal(38, 99, 1.5); await w(800);
 };
@@ -577,40 +588,66 @@ ANIM.indir = async function(vz, w){
   $(".bitti", vz).classList.add("on"); await w(2400);
 };
 
-/* ---------- HERO: ham kayıt → kurgu + alt kanal ---------- */
-var demo = $("#demo"), lane = $("#lane"), phase = $("#phase"), HK = [];
+/* ---------- HERO: RAW kayıt → kurgu; hatalar RAW'da kırmızı kalır; senkron dinleme (metinde kelime takibi) ---------- */
+var demo = $("#demo"), lane = $("#lane"), phase = $("#phase"), HK = [], KG = [];
 (function(){
   var kx = 0;
-  [[19,0,"k"],[3,20,"n","nefes"],[15,24,"b","yanlış okuma"],[22,40,"k"],[3,63,"n"],[6,67,"b","öksürük"],[24,74,"k"]].forEach(function(c){
+  [[19,0,"k"],[3,20,"n","nefes"],[15,24,"b","yanlış okuma"],[22,40,"k"],[3,63,"n","nefes"],[6,67,"b","öksürük"],[24,74,"k"]].forEach(function(c){
     var e = h("div", "clip " + (c[2] === "k" ? "g" : c[2]), c[3] ? '<span class="lbl">' + c[3] + "</span>" : "");
     e.style.width = c[0] + "%"; c.kx = c[2] === "k" ? kx : null; if (c[2] === "k") kx += c[0] + 1; lane.appendChild(e); HK.push([e, c]); });
+  // metni kelimelere böl (dinlerken kelime takibi için)
+  var dtx = $(".dtx", demo);
+  dtx.querySelectorAll("*").length; // .hl içi dahil
+  (function bol(node){ Array.prototype.slice.call(node.childNodes).forEach(function(n){
+    if (n.nodeType === 3){ var f = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(function(t){ if (!t) return; if (/^\s+$/.test(t)) f.appendChild(document.createTextNode(t)); else { var sp = h("span", "kw"); sp.textContent = t; f.appendChild(sp); } });
+      node.replaceChild(f, n); }
+    else bol(n); }); })(dtx);
   izle(demo);
 })();
 function heroBaslat(){
-  var hph = $("#hph");
-  function yerles(sifir){ HK.forEach(function(p){ var e = p[0], c = p[1];
-    if (sifir){ e.style.left = c[1] + "%"; e.style.top = "7px"; e.classList.remove("k", "tara"); e.style.opacity = 1; } }); }
+  var hph = $("#hph"), rph = $("#rph"), kph = $("#kph"), KW = demo.querySelectorAll(".dtx .kw");
+  var IYI = HK.filter(function(p){ return p[1][2] === "k"; });
+  var kurguSon = IYI.reduce(function(a, p){ return Math.max(a, p[1].kx + p[1][0]); }, 0);
+  function temizle(){
+    KG.forEach(function(e){ e.remove(); }); KG = [];
+    HK.forEach(function(p){ var e = p[0], c = p[1]; e.style.left = c[1] + "%"; e.style.top = "7px"; e.className = "clip " + (c[2] === "k" ? "g" : c[2]); e.style.opacity = 1; });
+    KW.forEach(function(k){ k.classList.remove("on"); });
+    [hph, rph, kph].forEach(function(x){ x.style.opacity = 0; x.style.left = "0%"; });
+  }
   oynat(demo, async function(el, w){
-    // sıfırla: geçişsiz, görünmezken
-    demo.classList.add("sifir"); lane.style.opacity = 0; yerles(true); demo.classList.remove("done"); hph.style.left = "0%"; hph.style.opacity = 0;
-    void lane.offsetWidth; demo.classList.remove("sifir"); phase.textContent = $("#hk1").textContent;
-    lane.style.opacity = 1; await w(1200);
-    // 1) tarama: metinle eşleştirme
+    demo.classList.add("sifir"); lane.style.opacity = 0; temizle(); demo.classList.remove("done");
+    void lane.offsetWidth; demo.classList.remove("sifir"); phase.textContent = "RAW kayıt";
+    lane.style.opacity = 1; await w(1100);
+    // 1) metinle eşleştirme: tarama; hatalar RAW'da kırmızı kalır
     phase.textContent = "Metinle eşleştiriliyor…"; hph.style.opacity = 1;
     for (var x = 0; x <= 100; x += 2){ hph.style.left = x + "%";
-      HK.forEach(function(p){ var c = p[1]; if (!p[0].classList.contains("tara") && x >= c[1] + c[0] / 2) p[0].classList.add("tara"); });
-      await w(28); }
+      HK.forEach(function(p){ var c = p[1]; if (!p[0].classList.contains("tara") && x >= c[1] + c[0] / 2){ p[0].classList.add("tara"); if (c[2] !== "k") p[0].classList.add("hata"); } });
+      await w(26); }
     hph.style.opacity = 0; await w(300);
-    // 2) yanlışlar alta, doğrular kurgu satırına (yalnız dikey)
-    phase.textContent = "Ayıklanıyor"; demo.classList.add("done");
-    HK.forEach(function(p){ var e = p[0], c = p[1]; if (c[2] !== "k"){ e.style.top = "159px"; e.style.opacity = .75; } });
-    await w(700);
-    HK.forEach(function(p){ var e = p[0], c = p[1]; if (c[2] === "k"){ e.style.top = "83px"; e.classList.add("k"); } });
+    // 2) doğru okumalar kurguya iner (RAW'da kaynak olarak kalır), boşluklar kapanır
+    phase.textContent = "Kurgu kuruluyor"; demo.classList.add("done");
+    IYI.forEach(function(p){ var e = p[0], c = p[1];
+      var k = h("div", "clip g"); k.style.width = c[0] + "%"; k.style.left = c[1] + "%"; k.style.top = "7px"; lane.appendChild(k); KG.push(k); k.kaynak = c; e.classList.add("kaynak"); });
+    void lane.offsetWidth;
+    KG.forEach(function(k){ k.style.top = "83px"; k.classList.add("k"); });
+    await w(950);
+    KG.forEach(function(k){ k.style.left = k.kaynak.kx + "%"; });
+    await w(1000);
+    // 3) senkron dinleme: kurguda çalma kafası, RAW'da kaynak yeri, metinde okunan kelime
+    phase.textContent = "Dinleniyor · metinde kelime takibi"; kph.style.opacity = 1; rph.style.opacity = 1;
+    var n = KW.length, son = -1;
+    for (var t = 0; t <= kurguSon; t += 0.6){
+      kph.style.left = t + "%";
+      var p = IYI.find(function(q){ return t >= q[1].kx && t <= q[1].kx + q[1][0]; });
+      if (p){ rph.style.left = (p[1][1] + (t - p[1].kx)) + "%"; }
+      var ki = Math.min(n - 1, Math.floor(t / kurguSon * n));
+      if (ki !== son){ if (son >= 0) KW[son].classList.remove("on"); KW[ki].classList.add("on"); son = ki; }
+      await w(55);
+    }
     await w(900);
-    // 3) kurguda boşluklar kapanır (yalnız yatay)
-    phase.textContent = "Kurgu kuruldu";
-    HK.forEach(function(p){ var e = p[0], c = p[1]; if (c[2] === "k") e.style.left = c.kx + "%"; });
-    await w(3200);
+    KW.forEach(function(k){ k.classList.remove("on"); }); kph.style.opacity = 0; rph.style.opacity = 0;
+    phase.textContent = "Kurgu hazır · hatalar RAW'da"; await w(2200);
     lane.style.opacity = 0; await w(500);
   });
 }
@@ -624,8 +661,7 @@ function rol(r, ilk){
   document.querySelectorAll("[data-r]").forEach(function(e){ var on = e.dataset.r === r; e.hidden = !on; if (on && !ilk){ e.classList.remove("fade"); void e.offsetWidth; e.classList.add("fade"); } });
   knobYer();
   var ed = r === "editor";                      // hero şeridi etiketleri
-  $("#hk1").textContent = ed ? "Kayıt" : "Kaydınız"; $("#hk1a").textContent = ed ? "yüklenen kayıt" : "raw kayıt";
-  if (/^(Kaydınız|Kayıt)$/.test($("#phase").textContent)) $("#phase").textContent = $("#hk1").textContent;
+  $("#hk1a").textContent = ed ? "yüklenen kayıt" : "kaydınız";
   var box = $("#adimlar"); box.innerHTML = "";
   ADIM[r].forEach(function(a, i){
     var s = h("div", "step" + (ilk ? "" : " fade"));
@@ -732,4 +768,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 21:44 -->
+<!-- yayin: 2026-11-16 21:56 -->
