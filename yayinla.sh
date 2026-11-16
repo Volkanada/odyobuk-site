@@ -8,7 +8,7 @@ H=$(git rev-parse HEAD)
 HEDEF="$HOME/odyobuk.com"
 mkdir -p "$HEDEF/fonts"
 [ -f "$HEDEF/index.html" ] && cp "$HEDEF/index.html" "$HEDEF/index-onceki.html"
-cp fonts/*.woff2 "$HEDEF/fonts/"
+cp fonts/*.woff2 fonts/OFL.txt "$HEDEF/fonts/"
 cp index.html "$HEDEF/index.html"
 # ücretsiz deneme (odyobuk.com/dene): yalnız bu beş dosya; ayar web kökü dışında (~/odyobuk-deneme/ayar.php)
 if [ -d dene ]; then
