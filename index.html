@@ -127,6 +127,8 @@ h1 em{font-style:italic}
 .clip.hata{background:color-mix(in srgb,var(--rose) 20%,transparent);color:var(--rose);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--rose) 70%,transparent)}
 .demo .clip.hata .lbl{opacity:1}
 .clip.kaynak{opacity:.55}
+#lane{overflow:hidden}
+.demo.kay .clip:not(.k){transition:left .45s cubic-bezier(.4,0,.2,1),opacity .6s,background .4s,color .4s}
 #rph,#kph{position:absolute;width:2px;z-index:4;opacity:0;transition:opacity .3s}
 #rph{top:3px;height:42px;background:color-mix(in srgb,var(--c2) 70%,transparent)}
 #kph{top:73px;height:56px;background:var(--c2)}
@@ -616,7 +618,7 @@ function heroBaslat(){
     [hph, rph, kph].forEach(function(x){ x.style.opacity = 0; x.style.left = "0%"; });
   }
   oynat(demo, async function(el, w){
-    demo.classList.add("sifir"); lane.style.opacity = 0; temizle(); demo.classList.remove("done");
+    demo.classList.add("sifir"); lane.style.opacity = 0; temizle(); demo.classList.remove("done", "kay");
     void lane.offsetWidth; demo.classList.remove("sifir"); phase.textContent = "RAW kayıt";
     lane.style.opacity = 1; await w(1100);
     // 1) metinle eşleştirme: tarama; hatalar RAW'da kırmızı kalır
@@ -636,17 +638,20 @@ function heroBaslat(){
     await w(1000);
     // 3) senkron dinleme: kurguda çalma kafası, RAW'da kaynak yeri, metinde okunan kelime
     phase.textContent = "Dinleniyor · metinde kelime takibi"; kph.style.opacity = 1; rph.style.opacity = 1;
-    var n = KW.length, son = -1;
+    var n = KW.length, son = -1, aktif = null; demo.classList.add("kay");
     for (var t = 0; t <= kurguSon; t += 0.6){
       kph.style.left = t + "%";
       var p = IYI.find(function(q){ return t >= q[1].kx && t <= q[1].kx + q[1][0]; });
-      if (p){ rph.style.left = (p[1][1] + (t - p[1].kx)) + "%"; }
+      if (p && p !== aktif){ aktif = p; var kay = p[1].kx - p[1][1];       // RAW, kurgudaki yere göre kayar: kaynak tam imlecin altında
+        HK.forEach(function(q){ q[0].style.left = (q[1][1] + kay) + "%"; }); }
+      rph.style.left = t + "%";
       var ki = Math.min(n - 1, Math.floor(t / kurguSon * n));
       if (ki !== son){ if (son >= 0) KW[son].classList.remove("on"); KW[ki].classList.add("on"); son = ki; }
       await w(55);
     }
     await w(900);
     KW.forEach(function(k){ k.classList.remove("on"); }); kph.style.opacity = 0; rph.style.opacity = 0;
+    HK.forEach(function(q){ q[0].style.left = q[1][1] + "%"; });
     phase.textContent = "Kurgu hazır · hatalar RAW'da"; await w(2200);
     lane.style.opacity = 0; await w(500);
   });
@@ -768,4 +773,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 21:56 -->
+<!-- yayin: 2026-11-16 21:59 -->
