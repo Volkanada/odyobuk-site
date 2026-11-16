@@ -17,5 +17,5 @@ if [ -d dene ]; then
 fi
 [ -f aydinlatma.html ] && cp aydinlatma.html "$HEDEF/aydinlatma.html"
 # ana sayfadaki deneme alanının örnekleri (ses + analiz sonucu)
-if [ -d ornek ]; then mkdir -p "$HEDEF/ornek"; cp ornek/*.json ornek/*.m4a "$HEDEF/ornek/"; fi
+if [ -d ornek ]; then mkdir -p "$HEDEF/ornek"; cp ornek/*.json ornek/*.mp3 "$HEDEF/ornek/"; rm -f "$HEDEF"/ornek/*.m4a; fi
 echo "$H" > "$HOME/.odyobuk_son"

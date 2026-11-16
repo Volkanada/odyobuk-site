@@ -642,7 +642,7 @@ ANIM.indir = async function(vz, w){
   $(".bitti", vz).classList.add("on"); await w(2400);
 };
 
-/* ---------- HERO: deneme alanı — gerçek kayıt, gerçek analiz sonucu (ornek/*.json + *.m4a; sunucuya bağlanmaz) ---------- */
+/* ---------- HERO: deneme alanı — gerçek kayıt, gerçek analiz sonucu (ornek/*.json + *.mp3; sunucuya bağlanmaz) ---------- */
 var demo = $("#demo"), ST = null;
 function heroBaslat(){ if (ST) return; ST = studioKur(); }
 function studioKur(){
@@ -704,11 +704,11 @@ function studioKur(){
     sec.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.ad === ad ? "true" : "false"); });
     durum.textContent = "Yükleniyor…";
     Promise.all([fetch("ornek/" + ad + ".json").then(function(r){ return r.json(); }),
-                 fetch("ornek/" + ad + ".m4a").then(function(r){ return r.arrayBuffer(); })]).then(function(x){
+                 fetch("ornek/" + ad + ".mp3").then(function(r){ return r.arrayBuffer(); })]).then(function(x){
       D = x[0]; ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
       return new Promise(function(res, rej){ ctx.decodeAudioData(x[1], res, rej); });
     }).then(function(b){
-      buf = b; aRaw.src = "ornek/" + ad + ".m4a"; aRaw.playbackRate = HIZ[hz]; D.hatalar.forEach(function(e){ e.alindi = false; });
+      buf = b; aRaw.src = "ornek/" + ad + ".mp3"; aRaw.playbackRate = HIZ[hz]; D.hatalar.forEach(function(e){ e.alindi = false; });
       D.tmax = Math.max(1, D.tepeler.slice().sort(function(a, b){ return a - b; })[Math.floor(D.tepeler.length * .98)]);
       var once = 0; kipler = D.klipler.map(function(k){ var o = { r0: k.r0, r1: k.r1, ara: Math.max(0, k.k0 - once) }; once = k.k1; return o; }); kurguHesapla(); kurguCiz();
       metin.innerHTML = ""; metin.scrollTop = 0; KW = D.kelimeler.map(function(k){ var sp = h("span", "kw"); sp.textContent = k.w; metin.appendChild(sp); metin.appendChild(document.createTextNode(" ")); return sp; });
@@ -741,7 +741,7 @@ function studioKur(){
     for (var i = 0; i < n; i++){ var x = Math.max(-1, Math.min(1, d[i])); v.setInt16(44 + i * 2, x < 0 ? x * 32768 : x * 32767, true); }
     return new Blob([ab], { type: "audio/wav" }); }
   function kurguCiz(){   // kurgu sesini klipler + aralarla çizer (8 ms giriş / 10 ms çıkış yumuşatma)
-    var sr = 22050, uz = kurguSure() + .3, oc = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, Math.ceil(sr * uz), sr);
+    var sr = buf.sampleRate, uz = kurguSure() + .3, oc = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, Math.ceil(sr * uz), sr);
     kipler.forEach(function(k){ var s = oc.createBufferSource(), g = oc.createGain(), d = k.r1 - k.r0; s.buffer = buf; s.connect(g); g.connect(oc.destination);
       g.gain.setValueAtTime(0, k.k0); g.gain.linearRampToValueAtTime(1, k.k0 + .008); g.gain.setValueAtTime(1, k.k0 + d - .01); g.gain.linearRampToValueAtTime(0, k.k0 + d);
       s.start(k.k0, k.r0, d); });
@@ -921,4 +921,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 22:49 -->
+<!-- yayin: 2026-11-17 mp3 -->
