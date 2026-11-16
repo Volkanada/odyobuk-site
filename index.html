@@ -134,7 +134,7 @@ h1 em{font-style:italic}
 .st-metin{font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--muted);height:118px;overflow:hidden;position:relative;margin-bottom:10px;
   -webkit-mask:linear-gradient(#000 70%,transparent);mask:linear-gradient(#000 70%,transparent)}
 .st-metin .kw{border-radius:4px;transition:background .12s,color .12s}
-.st-metin .kw.on{background:var(--grad);color:#fff;padding:0 2px;margin:0 -2px}
+.st-metin .kw.on{background:color-mix(in srgb,var(--amb) 38%,transparent);color:var(--text);padding:0 2px;margin:0 -2px}
 .st-metin .kw.ok{color:var(--text)}
 .st-tr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .st-btn{width:38px;height:38px;border-radius:50%;border:0;background:var(--text);color:var(--bg);display:grid;place-items:center;cursor:pointer;flex:none}
@@ -385,7 +385,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <p class="lead">İşlemsiz kaydı atın, Odyobuk metne göre kursun. Siz hızlı dinleyin, minik hataları tek tıkla düzeltin; gerekirse sanatçıdan metnin üstünde revize isteyin.</p>
   </div>
   <div class="cta"><a class="btn p lg" href="https://studio.odyobuk.com">Studio'ya giriş</a><a class="btn lg" href="#nasil">Nasıl çalışır</a></div>
-  <p class="note">Kurulum yok · Mac ve Windows tarayıcısından · kullanıcı adı ve şifreyle</p>
+  <p class="note">Kurulum yok · Mac ve Windows tarayıcısından</p>
 
   <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
     <div class="st-ust">
@@ -703,7 +703,7 @@ function studioKur(){
       buf = b; aRaw.src = "ornek/" + ad + ".m4a"; aRaw.playbackRate = HIZ[hz]; D.hatalar.forEach(function(e){ e.alindi = false; });
       D.tmax = Math.max(1, D.tepeler.slice().sort(function(a, b){ return a - b; })[Math.floor(D.tepeler.length * .98)]);
       var once = 0; kipler = D.klipler.map(function(k){ var o = { r0: k.r0, r1: k.r1, ara: Math.max(0, k.k0 - once) }; once = k.k1; return o; }); kurguHesapla(); kurguCiz();
-      metin.innerHTML = ""; KW = D.kelimeler.map(function(k){ var sp = h("span", "kw"); sp.textContent = k.w; metin.appendChild(sp); metin.appendChild(document.createTextNode(" ")); return sp; });
+      metin.innerHTML = ""; metin.scrollTop = 0; KW = D.kelimeler.map(function(k){ var sp = h("span", "kw"); sp.textContent = k.w; metin.appendChild(sp); metin.appendChild(document.createTextNode(" ")); return sp; });
       gor.raw = 0; gor.kur = 0; olcek(); ciz(); saat.textContent = "0:00"; anz.disabled = false;
       durum.textContent = "RAW kaydı dinleyin: tekrarlar, nefesler, hatalar içinde. Sonra analiz edin.";
     }).catch(function(){ durum.textContent = "Örnek yüklenemedi."; });
@@ -741,6 +741,8 @@ function studioKur(){
     saat.textContent = sure(t); var w = KUR.clientWidth;
     if (cal && cal.kip === "raw"){
       var ib = $(".st-ib", RAW); ib.classList.add("on"); ib.style.left = ((t - gor.raw) * PX) + "px";
+      var oz = D.klipler.find(function(k){ return t >= k.r0 && t <= k.r1; });
+      if (oz) kelimeIsle(oz.k0 + (t - oz.r0), true);
     } else {
       // kurgu görünümü sayfa sayfa; RAW, çalan kaynak kurgu imlecinin tam altında kalacak biçimde kayar
       if ((t - gor.kur) * PX > w * .9 || t < gor.kur){ gor.kur = Math.max(0, t - (w * .1) / PX); }
@@ -748,13 +750,15 @@ function studioKur(){
       if (k){ var rt = k.r0 + (t - k.k0); gor.raw = rt - x / PX; }
       var ibk = $(".st-ib", KUR), ibr = $(".st-ib", RAW); ibk.classList.add("on"); ibr.classList.add("on");
       ibk.style.left = x + "px"; ibr.style.left = x + "px"; ciz();
-      // metinde kelime takibi (kelime zamanları kurgu zamanı; geri alınanlar öncesindeki kaymayı yok sayar: yaklaşık)
-      var oran = t / kurguSure(), hedef = oran * D.kurgu_sure, ki = -1;
-      for (var i = 0; i < D.kelimeler.length; i++){ if (D.kelimeler[i].t <= hedef) ki = i; else break; }
-      KW.forEach(function(sp, i){ sp.classList.toggle("on", i === ki); sp.classList.toggle("ok", i < ki); });
-      if (ki >= 0){ var sp = KW[ki], ust = sp.offsetTop - metin.clientHeight * .35; if (Math.abs(metin.scrollTop - ust) > 24) metin.scrollTop = ust; }
+      // metinde kelime takibi: çalan klibin özgün kurgu zamanından (geri alınan parçalarda son kelime kalır)
+      var kk = kipler.find(function(q){ return t >= q.k0 && t < q.k1; }), oz2 = kk && !kk.geri && D.klipler.find(function(q){ return q.r0 === kk.r0; });
+      if (oz2) kelimeIsle(oz2.k0 + (t - kk.k0), false);
     }
   }
+  function kelimeIsle(kt, rawda){
+    var ki = -1; for (var i = 0; i < D.kelimeler.length; i++){ if (D.kelimeler[i].t <= kt + .05) ki = i; else break; }
+    KW.forEach(function(sp, i){ sp.classList.toggle("on", i === ki); sp.classList.toggle("ok", !rawda && i < ki); });
+    if (ki >= 0){ var sp = KW[ki], ust = sp.offsetTop - metin.clientHeight * .35; if (Math.abs(metin.scrollTop - ust) > 24) metin.scrollTop = Math.max(0, ust); } }
   oyn.onclick = function(){ if (cal) durdur(); else oynat(cal ? 0 : (analizli ? 0 : 0)); };
   // kanala tık: oradan çal
   RAW.addEventListener("click", function(ev){ if (!D || analizli) return; var x = ev.offsetX; oynat(gor.raw + x / PX); });
@@ -896,4 +900,4 @@ setTimeout(knobYer, 300);
 </script>
 </body>
 </html>
-<!-- yayin: 2026-11-16 22:34 -->
+<!-- yayin: 2026-11-16 22:47 -->
