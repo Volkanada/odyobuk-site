@@ -89,6 +89,11 @@ h1 em{font-style:italic}
 .lead{color:var(--muted);font-size:clamp(17px,2.05vw,19px);max-width:660px;margin:14px auto 0}
 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
 .note{color:var(--soft);font-size:14px;margin-top:16px}
+.yildiz{font:inherit;color:var(--soft);background:none;border:0;padding:0 3px;margin-left:1px;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.yildiz:hover,.yildiz[aria-expanded="true"]{color:var(--text)}
+.gerek{max-width:520px;margin:10px auto 0;padding:12px 16px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:13.5px;line-height:1.5;color:var(--soft);text-align:left}
+.gerek b{color:var(--text);font-weight:600}.gerek>b{display:block;margin-bottom:4px}
+.gerek ul{margin:0;padding-left:18px}
 .fade{animation:fade .45s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -391,7 +396,16 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <p class="lead">İşlemsiz kaydı atın, Odyobuk metne göre kursun. Siz hızlı dinleyin, minik hataları tek tıkla düzeltin; gerekirse sanatçıdan metnin üstünde revize isteyin.</p>
   </div>
   <div class="cta"><a class="btn p lg" href="https://studio.odyobuk.com">Studio'ya giriş</a><a class="btn lg" href="#nasil">Nasıl çalışır</a></div>
-  <p class="note">Kurulum yok · Mac ve Windows tarayıcısından</p>
+  <p class="note">Kurulum yok · Mac ve Windows tarayıcısından<button type="button" class="yildiz" aria-expanded="false" aria-controls="gerek" title="Sistem gereksinimleri">*</button></p>
+  <div class="gerek" id="gerek" hidden>
+    <b>Sistem gereksinimleri</b>
+    <ul>
+      <li><b>En iyi:</b> Google Chrome ya da Microsoft Edge, güncel sürüm — Mac ya da Windows bilgisayarda.</li>
+      <li>Safari ve Firefox'ta da açılır; sınamalarımızı Chrome ve Edge'de yapıyoruz.</li>
+      <li>Ekran en az 1280 px genişlik (dizüstü yeter). iPad ve telefon şimdilik desteklenmiyor.</li>
+      <li>Dinlemek için kulaklık; kayıt yüklemek için sabit internet bağlantısı.</li>
+    </ul>
+  </div>
 
   <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
     <div class="st-ust">
@@ -919,6 +933,8 @@ setTimeout(knobYer, 300);
   else window.addEventListener("load", function(){ setTimeout(basla, 350); });
 })();
 </script>
+<script>(function(){var b=document.querySelector(".yildiz"),g=document.getElementById("gerek");if(!b||!g)return;
+b.addEventListener("click",function(){var a=g.hidden;g.hidden=!a;b.setAttribute("aria-expanded",a?"true":"false");});})();</script>
 </body>
 </html>
-<!-- yayin: 2026-11-17 mp3 -->
+<!-- yayin: 2026-11-17 gereksinim -->
