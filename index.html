@@ -358,6 +358,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .demo .clip.n .lbl{display:none}
   .ak{grid-template-columns:1fr}.mak{height:240px}
 }
+.herovid{width:100vw;margin:40px 0 0 calc(50% - 50vw);background:#121316;line-height:0}.herovid video{display:block;width:100%;height:auto;max-height:520px;object-fit:cover}
+@media (prefers-reduced-motion:reduce){.herovid video{display:none}.herovid{background:#121316 url(video/hero.jpg) center/cover;aspect-ratio:1280/512}}
 </style>
 </head>
 <body>
@@ -406,6 +408,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
       <li>Dinlemek için kulaklık; kayıt yüklemek için sabit internet bağlantısı.</li>
     </ul>
   </div>
+
+  <div class="herovid" aria-hidden="true"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="auto"></video></div>
 
   <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
     <div class="st-ust">
