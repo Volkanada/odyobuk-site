@@ -18,4 +18,6 @@ fi
 [ -f aydinlatma.html ] && cp aydinlatma.html "$HEDEF/aydinlatma.html"
 # ana sayfadaki deneme alanının örnekleri (ses + analiz sonucu)
 if [ -d ornek ]; then mkdir -p "$HEDEF/ornek"; cp ornek/*.json ornek/*.mp3 "$HEDEF/ornek/"; rm -f "$HEDEF"/ornek/*.m4a; fi
+# hero döngü videosu
+if [ -d video ]; then mkdir -p "$HEDEF/video"; cp video/hero.mp4 video/hero.jpg "$HEDEF/video/"; fi
 echo "$H" > "$HOME/.odyobuk_son"

@@ -358,8 +358,28 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .demo .clip.n .lbl{display:none}
   .ak{grid-template-columns:1fr}.mak{height:240px}
 }
-.herovid{width:100vw;margin:40px 0 0 calc(50% - 50vw);background:#121316;line-height:0}.herovid video{display:block;width:100%;height:auto;max-height:520px;object-fit:cover}
-@media (prefers-reduced-motion:reduce){.herovid video{display:none}.herovid{background:#121316 url(video/hero.jpg) center/cover;aspect-ratio:1280/512}}
+/* hero: video arka plan, üstünde yazılar (Volkan, 19 Kasım) */
+.hero{padding-top:0}
+.hkap{position:relative;width:100vw;margin-left:calc(50% - 50vw);padding:56px 16px 60px;overflow:hidden;isolation:isolate;color:#fff}
+.hkap .herovid{position:absolute;inset:0;z-index:-2;background:#121316}
+.hkap .herovid video{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.55) saturate(1.15) blur(1px);transform:scale(1.02)}
+.hkap:after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 55% at 50% 45%,rgba(9,10,15,.72),rgba(9,10,15,.45) 75%),linear-gradient(180deg,rgba(9,10,15,.55),rgba(9,10,15,.25) 50%,rgba(9,10,15,.7))}
+.hkap h1,.hkap .hiz{color:#fff}
+.hkap .gt{background:linear-gradient(120deg,#5fe0ff 0%,#8a97ff 52%,#c48dff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hkap .lead{color:rgba(255,255,255,.84)}
+.hkap .ben{color:rgba(255,255,255,.72)}
+.hkap .note,.hkap .yildiz{color:rgba(255,255,255,.62)}
+.hkap .yildiz:hover,.hkap .yildiz[aria-expanded="true"]{color:#fff}
+.hkap .rol{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);box-shadow:none}
+.hkap .rol button{color:rgba(255,255,255,.72)}
+.hkap .rol button[aria-pressed="true"]{color:#fff}
+.hkap .btn:not(.p){color:#fff;border-color:rgba(255,255,255,.38);background:rgba(255,255,255,.06);backdrop-filter:blur(6px)}
+.hkap .btn:not(.p):hover{background:rgba(255,255,255,.16)}
+.hkap .btn.p{box-shadow:0 10px 30px -10px rgba(80,110,255,.8)}
+.hkap .gerek{background:rgba(18,19,24,.92);border-color:rgba(255,255,255,.16);color:rgba(255,255,255,.72)}
+.hkap .gerek b{color:#fff}
+.hero:before{display:none}
+@media (prefers-reduced-motion:reduce){.hkap .herovid video{display:none}.hkap .herovid{background:#121316 url(video/hero.jpg) center/cover}}
 </style>
 </head>
 <body>
@@ -379,6 +399,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 
 <main>
 <div class="w hero">
+<div class="hkap">
+  <div class="herovid" aria-hidden="true"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="auto"></video></div>
   <div class="rolsat"><span class="ben" aria-hidden="true">Ben bir…</span>
   <div class="rol" id="rol" role="group" aria-label="Kimsiniz?">
     <span class="knob" id="knob"></span>
@@ -409,8 +431,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     </ul>
   </div>
 
-  <div class="herovid" aria-hidden="true"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="auto"></video></div>
-
+</div>
   <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
     <div class="st-ust">
       <div class="st-sec" role="tablist" aria-label="Örnek metin"></div>
