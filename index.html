@@ -359,7 +359,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .ak{grid-template-columns:1fr}.mak{height:240px}
 }
 /* tanıtım videosu: sayfa ortasında tam genişlik bant (Volkan, 20 Kasım: heroda değil) */
-.vband{padding:24px 0 8px}
+.vband{padding:44px 0 8px}.vband .cta.dene{margin-top:22px}
 .vband .vpen{max-width:1080px;margin:0 auto;border-radius:18px;overflow:hidden;background:#121316;line-height:0;border:1px solid var(--line2);box-shadow:0 24px 60px -28px rgba(10,12,30,.45)}
 .vband video{display:block;width:100%;height:auto}
 @media (prefers-reduced-motion:reduce){.vband video{display:none}.vband .vpen{background:#121316 url(video/hero.jpg) center/cover;aspect-ratio:1280/512}}
@@ -416,29 +416,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   </div>
 
 </div>
-  <div class="card demo st" id="demo" aria-label="Deneme alanı: gerçek bir kaydı dinleyin, analiz edin, kurguyu dinleyin">
-    <div class="st-ust">
-      <div class="st-sec" role="tablist" aria-label="Örnek metin"></div>
-      <span class="st-not">Gerçek kayıt · gerçek analiz sonucu</span>
-    </div>
-    <div class="st-metin" aria-live="off"></div>
-    <div class="st-tr">
-      <button class="st-btn st-oynat" type="button" aria-label="Oynat"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a.9.9 0 0 0 1.4.8l10-6.4a.9.9 0 0 0 0-1.6l-10-6.4A.9.9 0 0 0 8 5.6z"/></svg></button>
-      <span class="st-saat">0:00</span>
-      <span class="st-olcer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      <span class="st-durum">RAW kaydı dinleyin, sonra analiz edin</span>
-      <span class="sp"></span>
-      <button class="st-max" type="button" aria-pressed="false" title="Maximizer: yalnız dinlerken sesi toparlayıp yükseltir; kurguya ve dışa aktarmaya etki etmez">Maximizer</button>
-      <button class="st-hiz" type="button" title="Dinleme hızı (ses perdesi korunur)">1×</button>
-      <button class="st-analiz" type="button">Analiz et</button>
-      <button class="st-bastan" type="button" hidden>Baştan</button>
-    </div>
-    <div class="st-kanallar">
-      <div class="st-kn"><div class="st-ad"><b>Kurgu</b><small>editlenmiş</small></div><div class="st-alan" data-k="kurgu"><canvas></canvas><div class="st-ib"></div><div class="st-bos">Analiz edince burada görünecek</div></div></div>
-      <div class="st-kn"><div class="st-ad"><b>RAW Kayıt</b><small>kaydınız</small></div><div class="st-alan" data-k="raw"><canvas></canvas><div class="st-ib"></div></div></div>
-    </div>
-    <div class="st-ipucu">Kırmızılar kurguya girmeyen yerler: tekrar, nefes, metinde olmayan ses. Birine <b>çift tıklayın</b>, kurguya girsin. Kanala tıklayınca oradan çalar.</div>
-  </div>
+  <div class="vband" aria-label="Odyobuk Studio tanıtım videosu"><div class="vpen"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="metadata"></video></div>
+    <div class="cta dene"><a class="btn p lg" href="/dene/">Şimdi dene</a></div></div>
 </div>
 </div>
 
@@ -449,8 +428,6 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <p>Sanatçının işlemsiz kaydını kesip biçmekle uğraşmayın. Odyobuk metne göre kurar; siz kulağınızı yalnız gereken yere verin.</p></div></div>
   <div id="adimlar"></div>
 </div></section>
-
-<div class="w vband" aria-hidden="true"><div class="vpen"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="metadata"></video></div></div>
 
 <section id="gizlilik"><div class="w"><div class="priv">
   <div class="sh"><small class="gt">Gizlilik</small><h2>Ses ve metniniz yalnız bizim sunucularımızda.</h2>
@@ -669,7 +646,7 @@ ANIM.indir = async function(vz, w){
 
 /* ---------- HERO: deneme alanı — gerçek kayıt, gerçek analiz sonucu (ornek/*.json + *.mp3; sunucuya bağlanmaz) ---------- */
 var demo = $("#demo"), ST = null;
-function heroBaslat(){ if (ST) return; ST = studioKur(); }
+function heroBaslat(){ if (ST || !demo) return; ST = studioKur(); }   /* demo kartı kaldırıldı (20 Kas, Volkan): yerinde video */
 function studioKur(){
   var ORN = [["doga", "Doğa ve göl"], ["can", "Can ve sis"], ["kumsal", "Gizli kumsal"]];
   var sec = $(".st-sec", demo), metin = $(".st-metin", demo), oyn = $(".st-oynat", demo), saat = $(".st-saat", demo),
