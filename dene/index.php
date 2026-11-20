@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($adim === 'sil' && $kisi) {
         // kullanıcı isteğiyle silme: oturum e-postanın sahibi olduğunu zaten kanıtladı (son 30 günde kodla doğrulandı)
         kisi_sil($kisi['eposta_ozet']); oturum_kapat(); $kisi = null; $gorunum = 'eposta';
-        $ileti = 'E-posta adresiniz ve deneme kayıtlarınız silindi.';
+        $ileti = 'E-posta adresiniz ve doğrulama kayıtlarınız silindi. Studio hesabınızı Studio'da Hesabım'dan silebilirsiniz.';
     }
 }
 bitti:
@@ -276,7 +276,7 @@ footer{text-align:center;color:var(--soft);font-size:12.5px;padding:18px}
   <div class="satir">
     <form method="post"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="cikis">
       <button class="ikinci" type="submit">Bu tarayıcıda oturumu kapat</button></form>
-    <form method="post" onsubmit="return confirm('E-posta adresiniz ve deneme kayıtlarınız kalıcı olarak silinsin mi?')">
+    <form method="post" onsubmit="return confirm('E-posta adresiniz ve doğrulama kayıtlarınız kalıcı olarak silinsin mi?')">
       <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="sil">
       <button class="ikinci" type="submit">E-postamı ve kayıtlarımı sil</button></form>
   </div>
@@ -314,7 +314,7 @@ footer{text-align:center;color:var(--soft);font-size:12.5px;padding:18px}
   <form method="post">
     <input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="adim" value="kod_iste">
     <label>E-posta adresiniz<input type="email" name="eposta" autocomplete="email" maxlength="254" placeholder="ornek@eposta.com" required autofocus></label>
-    <label class="onay"><input type="checkbox" name="kvkk" value="1" required><span>E-posta adresimin deneme için işlenmesine ilişkin
+    <label class="onay"><input type="checkbox" name="kvkk" value="1" required><span>E-posta adresimin hesap açmak ve şifremi yenilemek için işlenmesine ilişkin
       <a href="/aydinlatma.html" target="_blank" rel="noopener">aydınlatma metnini</a> okudum.</span></label>
     <label class="onay"><input type="checkbox" name="duyuru" value="1"><span>Odyobuk Studio duyurularını e-postayla almak
       istiyorum. <span style="color:var(--soft)">(isteğe bağlı)</span></span></label>
@@ -323,7 +323,7 @@ footer{text-align:center;color:var(--soft);font-size:12.5px;padding:18px}
 <?php endif; ?>
 </div>
 <p class="not"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
-  <span>E-posta adresiniz yalnız Seslendirme Evi'nin kayıtlarında tutulur; deneme sesinizin ve metninizin işlendiği stüdyo
+  <span>E-posta adresiniz yalnız Seslendirme Evi'nin kayıtlarında tutulur; ses ve metninizin işlendiği Studio
   sunucusuna gönderilmez. Dilediğinizde «E-postamı ve kayıtlarımı sil» ile silebilirsiniz.</span></p>
 <p class="beta">Odyobuk Studio şu an beta sürümünde · dakika ve paket satın alma yakında</p>
 </main>
