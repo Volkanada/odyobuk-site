@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($adim === 'sil' && $kisi) {
         // kullanıcı isteğiyle silme: oturum e-postanın sahibi olduğunu zaten kanıtladı (son 30 günde kodla doğrulandı)
         kisi_sil($kisi['eposta_ozet']); oturum_kapat(); $kisi = null; $gorunum = 'eposta';
-        $ileti = 'E-posta adresiniz ve doğrulama kayıtlarınız silindi. Studio hesabınızı Studio'da Hesabım'dan silebilirsiniz.';
+        $ileti = 'E-posta adresiniz ve doğrulama kayıtlarınız silindi.';
     }
 }
 bitti:
