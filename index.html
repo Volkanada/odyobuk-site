@@ -359,9 +359,10 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .ak{grid-template-columns:1fr}.mak{height:240px}
 }
 /* tanıtım videosu: sayfa ortasında tam genişlik bant (Volkan, 20 Kasım: heroda değil) */
-.vband{width:100%;margin:0;background:#121316;line-height:0}
-.vband video{display:block;width:100%;height:auto;max-height:520px;object-fit:cover}
-@media (prefers-reduced-motion:reduce){.vband video{display:none}.vband{background:#121316 url(video/hero.jpg) center/cover;aspect-ratio:1280/512}}
+.vband{padding:24px 0 8px}
+.vband .vpen{max-width:1080px;margin:0 auto;border-radius:18px;overflow:hidden;background:#121316;line-height:0;border:1px solid var(--line2);box-shadow:0 24px 60px -28px rgba(10,12,30,.45)}
+.vband video{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion:reduce){.vband video{display:none}.vband .vpen{background:#121316 url(video/hero.jpg) center/cover;aspect-ratio:1280/512}}
 .alan{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:22px auto 0;max-width:720px}.alan span{font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
 </style>
 </head>
@@ -449,7 +450,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   <div id="adimlar"></div>
 </div></section>
 
-<div class="vband" aria-hidden="true"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="metadata"></video></div>
+<div class="w vband" aria-hidden="true"><div class="vpen"><video src="video/hero.mp4" poster="video/hero.jpg" autoplay muted loop playsinline preload="metadata"></video></div></div>
 
 <section id="gizlilik"><div class="w"><div class="priv">
   <div class="sh"><small class="gt">Gizlilik</small><h2>Ses ve metniniz yalnız bizim sunucularımızda.</h2>
