@@ -374,7 +374,16 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 .sorip button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);border-radius:999px;padding:5px 12px;cursor:pointer}
 .sorip button:hover{color:var(--text);border-color:var(--line2)}
 .sornot{font-size:12px;color:var(--soft);text-align:center;margin:8px 0 0}
-.sorcevap{max-height:360px;overflow:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
+.sorcevap{flex:1;min-height:140px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:16px 18px}
+/* cevaplar modal pencerede (22 Kas, Volkan: «modal olarak açılsın … yazdıkça genişliyor burası»): sayfa büyümez */
+.sordlg{text-align:left;width:min(580px,calc(100vw - 32px));max-height:min(640px,calc(100vh - 48px));padding:0;border:1px solid var(--line2);border-radius:18px;background:var(--bg);color:var(--text);box-shadow:0 30px 80px -30px rgba(10,12,40,.55)}
+.sordlg[open]{display:flex;flex-direction:column}
+.sordlg::backdrop{background:rgba(12,14,34,.42);backdrop-filter:blur(3px)}
+.sordlg .sdbas{display:flex;align-items:center;gap:10px;padding:14px 14px 12px 18px;border-bottom:1px solid var(--line)}
+.sordlg .sdbas b{font-size:16px}.sordlg .sdbas .sorik{width:18px;height:18px;color:var(--c2)}
+.sordlg .sdkapat{margin-left:auto;width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:22px;line-height:1;cursor:pointer}
+.sordlg .sdkapat:hover{background:var(--bg2);color:var(--text)}
+.sordlg .sorkutu{margin:0 14px 14px;box-shadow:none}
 .sorcevap .s{align-self:flex-end;background:var(--tint);border-radius:12px 12px 4px 12px;padding:8px 12px;max-width:85%;font-size:15px}
 .sorcevap .c{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px 12px 12px 4px;padding:10px 14px;max-width:92%;white-space:pre-line;line-height:1.55;font-size:15px}
 .sorcevap .c.bek{color:var(--soft)}.sorcevap .c.hata{color:var(--rose)}
@@ -435,8 +444,12 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
       <li>Dinlemek için kulaklık; kayıt yüklemek için sabit internet bağlantısı.</li>
     </ul>
   </div>
+  <dialog class="sordlg" id="sorDlg" aria-label="Bana sor">
+    <div class="sdbas"><svg class="sorik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><b>Bana sor</b><button type="button" class="sdkapat" id="sorKapat" aria-label="Kapat">×</button></div>
+    <div class="sorcevap" id="sorCevap" aria-live="polite"></div>
+    <form class="sorkutu" id="sorDlgF" autocomplete="off"><input id="sorDlgIn" type="text" maxlength="500" placeholder="Başka bir şey sorun…" aria-label="Soru"><button class="btn p" type="submit">Sor</button></form>
+  </dialog>
   <form class="sor" id="sor" autocomplete="off" aria-label="Odyobuk Studio'ya soru sorun">
-    <div class="sorcevap" id="sorCevap" hidden aria-live="polite"></div>
     <div class="sorkutu"><svg class="sorik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><input id="sorIn" type="text" maxlength="500" placeholder="Bana sor: Odyobuk hakkında merak ettiğiniz her şey" aria-label="Odyobuk Studio hakkında soru"><button class="btn p" type="submit">Sor</button></div>
     <div class="sorip" id="sorIp"><button type="button">90 dakikalık kayıt yükleyebilir miyim?</button><button type="button">Ücretsiz mi?</button><button type="button">Ses ve metnim nerede duruyor?</button></div>
   </form>
@@ -946,12 +959,15 @@ setTimeout(knobYer, 300);
   else window.addEventListener("load", function(){ setTimeout(basla, 350); });
 })();
 </script>
-<script>(function(){            // Bana sor: studio.odyobuk.com/tanitim/sor (girişsiz; yalnız odyobuk.com'dan; sohbet yalnız bu sayfada)
-  var f = document.getElementById("sor"); if (!f || !window.fetch) return;
-  var inp = document.getElementById("sorIn"), kutu = document.getElementById("sorCevap"), ip = document.getElementById("sorIp"), gec = [], mesgul = false;
-  function ekle(sinif, t){ var d = document.createElement("div"); d.className = sinif; d.textContent = t; kutu.appendChild(d); kutu.hidden = false; kutu.scrollTop = kutu.scrollHeight; return d; }
+<script>(function(){            // Bana sor: studio.odyobuk.com/tanitim/sor (girişsiz; yalnız odyobuk.com'dan; sohbet yalnız bu sayfada). Cevaplar modal pencerede.
+  var f = document.getElementById("sor"), dlg = document.getElementById("sorDlg"); if (!f || !dlg || !window.fetch) return;
+  var inp = document.getElementById("sorIn"), din = document.getElementById("sorDlgIn"), kutu = document.getElementById("sorCevap"),
+      ip = document.getElementById("sorIp"), gec = [], mesgul = false;
+  function ac(){ if (!dlg.open){ if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); } setTimeout(function(){ din.focus(); }, 30); }
+  function kapat(){ if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); }
+  function ekle(sinif, t){ var d = document.createElement("div"); d.className = sinif; d.textContent = t; kutu.appendChild(d); kutu.scrollTop = kutu.scrollHeight; return d; }
   function sor(q){
-    q = (q || "").trim(); if (!q || mesgul) return; mesgul = true; inp.value = "";
+    q = (q || "").trim(); if (!q) return; ac(); if (mesgul) return; mesgul = true; inp.value = ""; din.value = "";
     ekle("s", q); var c = ekle("c bek", "Yazıyor…");
     var ctl = window.AbortController ? new AbortController() : null, zt = setTimeout(function(){ if (ctl) ctl.abort(); }, 45000);
     fetch("https://studio.odyobuk.com/tanitim/sor", {method: "POST", body: JSON.stringify({soru: q, gecmis: gec.slice(-6)}), signal: ctl ? ctl.signal : undefined})
@@ -961,9 +977,11 @@ setTimeout(knobYer, 300);
         else { c.className = "c hata"; c.textContent = j.hata || "Şu an cevap veremiyorum; biraz sonra yeniden deneyin."; } })
       .catch(function(){ c.className = "c hata"; c.textContent = "Bağlantı kurulamadı; biraz sonra yeniden deneyin."; })
       .then(function(){ clearTimeout(zt); mesgul = false; kutu.scrollTop = kutu.scrollHeight; });
-    if (ip) ip.hidden = true;
   }
   f.addEventListener("submit", function(e){ e.preventDefault(); sor(inp.value); });
+  document.getElementById("sorDlgF").addEventListener("submit", function(e){ e.preventDefault(); sor(din.value); });
+  document.getElementById("sorKapat").addEventListener("click", kapat);
+  dlg.addEventListener("click", function(e){ if (e.target === dlg) kapat(); });      // pencerenin dışına tıklayınca kapanır
   if (ip) ip.addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) sor(b.textContent); });
 })();</script>
 <script>(function(){var b=document.querySelector(".yildiz"),g=document.getElementById("gerek");if(!b||!g)return;
