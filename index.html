@@ -361,6 +361,24 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .demo .clip.n .lbl{display:none}
   .ak{grid-template-columns:1fr}.mak{height:240px}
 }
+/* Bana sor (22 Kas, Volkan: «bana sor? diye heroda bir alanı olsun … odyobuk ile ilgili sorulara cevap versin»):
+   studio.odyobuk.com/tanitim/sor'a sorar; sohbet yalnız bu sayfada (bellekte), kaydedilmez */
+.sor{max-width:640px;margin:30px auto 0;text-align:left}
+.sorkutu{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:6px 6px 6px 14px;box-shadow:0 12px 32px -20px rgba(20,22,60,.35)}
+.sorkutu:focus-within{border-color:var(--c2)}
+.sorkutu .sorik{flex:none;width:18px;height:18px;color:var(--c2)}
+.sorkutu input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:16px;padding:9px 4px;color:var(--text);outline:none}
+.sorkutu input::placeholder{color:var(--soft)}
+.sorkutu .btn{flex:none;padding:9px 16px}
+.sorip{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;justify-content:center}
+.sorip button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);border-radius:999px;padding:5px 12px;cursor:pointer}
+.sorip button:hover{color:var(--text);border-color:var(--line2)}
+.sornot{font-size:12px;color:var(--soft);text-align:center;margin:8px 0 0}
+.sorcevap{max-height:360px;overflow:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
+.sorcevap .s{align-self:flex-end;background:var(--tint);border-radius:12px 12px 4px 12px;padding:8px 12px;max-width:85%;font-size:15px}
+.sorcevap .c{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px 12px 12px 4px;padding:10px 14px;max-width:92%;white-space:pre-line;line-height:1.55;font-size:15px}
+.sorcevap .c.bek{color:var(--soft)}.sorcevap .c.hata{color:var(--rose)}
+@media (max-width:560px){.sorkutu input{font-size:16px}.sorip button{font-size:12.5px}}
 /* tanıtım videosu: sayfa ortasında tam genişlik bant (Volkan, 20 Kasım: heroda değil) */
 .vband{padding:44px 0 8px}.vband .cta.dene{margin-top:22px}
 .vband .vpen{max-width:1080px;margin:0 auto;border-radius:18px;overflow:hidden;background:#121316;line-height:0;border:1px solid var(--line2);box-shadow:0 24px 60px -28px rgba(10,12,30,.45)}
@@ -417,6 +435,12 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
       <li>Dinlemek için kulaklık; kayıt yüklemek için sabit internet bağlantısı.</li>
     </ul>
   </div>
+  <form class="sor" id="sor" autocomplete="off" aria-label="Odyobuk Studio'ya soru sorun">
+    <div class="sorcevap" id="sorCevap" hidden aria-live="polite"></div>
+    <div class="sorkutu"><svg class="sorik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><input id="sorIn" type="text" maxlength="500" placeholder="Bana sor: Odyobuk hakkında merak ettiğiniz her şey" aria-label="Odyobuk Studio hakkında soru"><button class="btn p" type="submit">Sor</button></div>
+    <div class="sorip" id="sorIp"><button type="button">90 dakikalık kayıt yükleyebilir miyim?</button><button type="button">Ücretsiz mi?</button><button type="button">Ses ve metnim nerede duruyor?</button></div>
+    <p class="sornot">Sorularınız cevaplanmak için Anthropic'e (Claude) gönderilir; kişisel bilgi yazmayın.</p>
+  </form>
 
 </div>
   <div class="vband" aria-label="Odyobuk Studio tanıtım videosu"><div class="vpen"><video src="video/hero.mp4?v=2" poster="video/hero.jpg?v=2" autoplay muted loop playsinline preload="metadata"></video></div></div>
@@ -923,6 +947,26 @@ setTimeout(knobYer, 300);
   else window.addEventListener("load", function(){ setTimeout(basla, 350); });
 })();
 </script>
+<script>(function(){            // Bana sor: studio.odyobuk.com/tanitim/sor (girişsiz; yalnız odyobuk.com'dan; sohbet yalnız bu sayfada)
+  var f = document.getElementById("sor"); if (!f || !window.fetch) return;
+  var inp = document.getElementById("sorIn"), kutu = document.getElementById("sorCevap"), ip = document.getElementById("sorIp"), gec = [], mesgul = false;
+  function ekle(sinif, t){ var d = document.createElement("div"); d.className = sinif; d.textContent = t; kutu.appendChild(d); kutu.hidden = false; kutu.scrollTop = kutu.scrollHeight; return d; }
+  function sor(q){
+    q = (q || "").trim(); if (!q || mesgul) return; mesgul = true; inp.value = "";
+    ekle("s", q); var c = ekle("c bek", "Yazıyor…");
+    var ctl = window.AbortController ? new AbortController() : null, zt = setTimeout(function(){ if (ctl) ctl.abort(); }, 45000);
+    fetch("https://studio.odyobuk.com/tanitim/sor", {method: "POST", body: JSON.stringify({soru: q, gecmis: gec.slice(-6)}), signal: ctl ? ctl.signal : undefined})
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ return [r.ok, j]; }); })
+      .then(function(x){ var ok = x[0], j = x[1] || {};
+        if (ok && j.metin){ c.className = "c"; c.textContent = j.metin; gec.push({rol: "kullanici", metin: q}, {rol: "asistan", metin: j.metin}); }
+        else { c.className = "c hata"; c.textContent = j.hata || "Şu an cevap veremiyorum; biraz sonra yeniden deneyin."; } })
+      .catch(function(){ c.className = "c hata"; c.textContent = "Bağlantı kurulamadı; biraz sonra yeniden deneyin."; })
+      .then(function(){ clearTimeout(zt); mesgul = false; kutu.scrollTop = kutu.scrollHeight; });
+    if (ip) ip.hidden = true;
+  }
+  f.addEventListener("submit", function(e){ e.preventDefault(); sor(inp.value); });
+  if (ip) ip.addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) sor(b.textContent); });
+})();</script>
 <script>(function(){var b=document.querySelector(".yildiz"),g=document.getElementById("gerek");if(!b||!g)return;
 b.addEventListener("click",function(){var a=g.hidden;g.hidden=!a;b.setAttribute("aria-expanded",a?"true":"false");});})();</script>
 </body>
