@@ -353,7 +353,9 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .rv{grid-template-columns:1fr}.rl{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:12px}
 }
 @media (max-width:560px){
-  .durum{display:none}
+  /* telefonda da görünür (22 Kas, Volkan: «mobilde stüdyo durumum gözükmüyo»): yer dar, yalnız renkli nokta; dokununca kutu tam genişlik */
+  button.durum{padding:10px;border-color:var(--line)}button.durum span{display:none}button.durum i{width:9px;height:9px}
+  .dpanel{position:fixed;left:16px;right:16px;top:76px;width:auto}
   .rol button{padding:10px 13px;font-size:13.5px}
   .ben{font-size:19px}
   .demo .clip.n .lbl{display:none}
@@ -851,7 +853,7 @@ setTimeout(knobYer, 300);
     x.toLocaleTimeString("tr-TR", {hour: "2-digit", minute: "2-digit"}); }
   function once(ms){ var s = Math.round((Date.now() - ms)/1000); return s < 10 ? "az önce" : s < 60 ? s + " sn önce" : Math.round(s/60) + " dk önce"; }
   function yaz(cls, t){ [d, p].forEach(function(e){ e.classList.remove("bakim", "bekle"); if (cls) e.classList.add(cls); });
-    d.lastElementChild.textContent = t; bas.textContent = t; }
+    d.lastElementChild.textContent = t; bas.textContent = t; d.title = t; d.setAttribute("aria-label", t); }      // telefonda yazı gizli: ad buradan
   function doldur(){
     var j = son || {}, r = [];
     if (son && j.ok){
