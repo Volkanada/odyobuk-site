@@ -537,9 +537,9 @@ var ADIM = {
   ],
   editor: [
     ["Kayıt", "Sanatçıdan gelen işlemsiz kaydı bırakın", "Uzun, tekrarlı, nefesli ham dosyaları metinle birlikte projeye bırakın. Kesip biçmek yok; bölümler metinden ayrılır.", ["Birden çok kayıt, tek proje", "Metin PDF, Word ya da TXT"], "yukle"],
-    ["Analiz", "“Analiz et”e basın, kahve makinenize de", "Odyobuk sanatçının kaydını metinle eşleştirir: son okuma kurguya girer; yanlış okuma, nefes ve tekrarlar ham kayıtta işaretli kalır.", ["Kahveniz ve sanatçının kaydı hazır", "Hiçbir parça silinmez"], "kahve"],
+    ["Analiz", "“Analiz et”e basın, kahve makinenize de", "Odyobuk sanatçının kaydını metinle eşleştirir: son okuma kurguya girer; tekrarlar, nefesler ve metinde olmayan sesler alt kanallarda ayrı ayrı durur.", ["Kahveniz ve sanatçının kaydı hazır", "Hiçbir parça silinmez"], "kahve"],
     ["Dinle, düzelt", "Yalnız gereken yere kulak verin", "Notlar paneli yanlış okumaları, eksikleri, tekrarları ayrı ayrı listeler. Seçin, silin, bölün, kırpın, taşıyın; her adım ⌘Z ile geri alınır.", ["Kaydır ya da Serbest: arkadakiler kaysın mı?", "Pro Tools, Logic, Cubase, Audition kısayolları"], "duzelt"],
-    ["Ham kayıttan", "Doğru okumayı ham kayıttan alın", "Ham kayıtta kelimeleri seçip kurguya bırakın, dört seçenekten birini seçin: metindeki yerine, araya ekle, üstüne yaz ya da bindir. Seçtiğiniz hemen dinletilir.", ["1 · 2 · 3 · 4 tuşlarıyla değiştirin", "Enter onaylar, tek ⌘Z geri alır"], "birak"],
+    ["Okumalar", "Başka okumayı tek tıkla kurguya alın", "Sanatçının aynı cümleyi her okuyuşu, kurgudaki kelimelerin hemen altında Okumalar kanalında durur. Tıklayın, dinleyin; beğendiyseniz «Kurguyla değiştir»: okuma kurguya çıkar, önceki kurgu alta iner.", ["D tuşu, çift tık ya da yukarı sürükleyin", "Tek ⌘Z geri alır"], "okuma"],
     ["Revize", "Sanatçıdan metin üstünde revize isteyin", "Yanlış okunan yeri metinde seçin, notunuzu yazın. Sanatçıya Word ve örnek sesle gider; gelen revize kendiliğinden yerine oturur.", ["Yer seç → not yaz → gönder", "Revize gelince eski okuma kurgudan çıkar"], "revize"],
     ["Teslim", "Kurguyu indirin, teslim edin", "Bölümü, her bölümü ayrı ya da hepsini tek zip olarak indirin: WAV, 16 bit WAV ya da MP3.", ["İşlemsiz ya da dinlediğiniz gibi", "Ham kayıt ve revizeler arşivde"], "indir"]
   ]
@@ -594,10 +594,10 @@ var vio = "IntersectionObserver" in window ? new IntersectionObserver(function(e
 function ekran(ad){ return async function(vz, w){
   if (!vz._v){ vz.innerHTML = ""; vz.classList.add("ekran");
     var v = h("video"); v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.setAttribute("muted", ""); v.preload = "none";
-    v.poster = "video/adim-" + ad + ".jpg"; v.src = "video/adim-" + ad + ".mp4"; v.setAttribute("aria-label", "Odyobuk Studio ekranı");
+    v.poster = "video/adim-" + ad + ".jpg?v=2"; v.src = "video/adim-" + ad + ".mp4?v=2"; v.setAttribute("aria-label", "Odyobuk Studio ekranı");
     vz.appendChild(v); vz._v = v; if (vio) vio.observe(v); }
   await w(600000); }; }
-["yukle", "dinle", "duzelt", "birak", "revize", "indir"].forEach(function(ad){ ANIM[ad] = ekran(ad); });
+["yukle", "dinle", "duzelt", "okuma", "revize", "indir"].forEach(function(ad){ ANIM[ad] = ekran(ad); });
 
 ANIM.kahve = async function(vz, w){
   var ed = vz.dataset.rol === "editor";
