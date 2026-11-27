@@ -10,6 +10,8 @@ mkdir -p "$HEDEF/fonts"
 [ -f "$HEDEF/index.html" ] && cp "$HEDEF/index.html" "$HEDEF/index-onceki.html"
 cp fonts/*.woff2 fonts/OFL.txt "$HEDEF/fonts/"
 cp index.html "$HEDEF/index.html"
+# sekme / ana ekran simgeleri (iPhone Chrome / Safari gömülü simgeyi göstermez, dosya ister)
+cp favicon.ico simge-96.png simge-180.png "$HEDEF/"
 # ücretsiz deneme (odyobuk.com/dene): yalnız bu beş dosya; ayar web kökü dışında (~/odyobuk-deneme/ayar.php)
 if [ -d dene ]; then
   mkdir -p "$HEDEF/dene"
